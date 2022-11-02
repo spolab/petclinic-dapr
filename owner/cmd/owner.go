@@ -9,7 +9,7 @@ import (
 func main() {
 	app := echo.New()
 	app.GET("/", helloWorld)
-	app.Start("localhost:3000")
+	app.Start(":3000")
 }
 
 func helloWorld(c echo.Context) error {
