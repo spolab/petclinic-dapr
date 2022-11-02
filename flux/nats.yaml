@@ -11,7 +11,7 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmChart
 metadata:
   name: podinfo
-  namespace: default
+  namespace: petclinic
 spec:
   interval: 5m0s
   chart: nats
