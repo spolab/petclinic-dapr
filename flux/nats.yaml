@@ -2,7 +2,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: nats
-  namespace: petclinic
 spec:
   interval: 5m0s
   url: https://nats-io.github.io/k8s/helm/charts/
@@ -11,7 +10,6 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmChart
 metadata:
   name: nats
-  namespace: petclinic
 spec:
   interval: 5m0s
   chart: nats
@@ -20,3 +18,5 @@ spec:
   sourceRef:
     kind: HelmRepository
     name: nats
+  valueFiles:
+    - nats-values.yaml
