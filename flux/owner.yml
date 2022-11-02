@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: petclinic-owner
-        image: spolab/petclinc-owner:v0.0.2
+        image: spolab/petclinic-owner:v0.0.2
         resources:
           limits:
             memory: "128Mi"
