@@ -5,6 +5,8 @@ metadata:
   namespace: petclinic
   labels:
     name: petclinic
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
   - host: petclinic.k8s.local
