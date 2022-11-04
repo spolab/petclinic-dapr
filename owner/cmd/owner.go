@@ -14,7 +14,7 @@ func main() {
 		panic(err)
 	}
 	app := echo.New()
-	app.GET("/:name", helloWorld(dapr))
+	app.POST("/:name", helloWorld(dapr))
 	app.Start(":3000")
 }
 
