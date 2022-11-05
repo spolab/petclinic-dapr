@@ -13,7 +13,7 @@ func main() {
 		panic(err)
 	}
 	app := echo.New()
-	app.POST("/", helloWorld(dapr))
+	app.POST("/sayHello", helloWorld(dapr))
 	app.Start("127.0.0.1:3000")
 }
 
