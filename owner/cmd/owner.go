@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dapr/go-sdk/client"
@@ -14,15 +13,13 @@ func main() {
 		panic(err)
 	}
 	app := echo.New()
-	app.POST("/:name", helloWorld(dapr))
-	app.Start(":3000")
+	app.POST("/", helloWorld(dapr))
+	app.Start("127.0.0.1:3000")
 }
 
 func helloWorld(dapr client.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		name := c.Param("name")
-		message := fmt.Sprintf("Hello, %s", name)
-		c.String(http.StatusOK, message)
+		c.String(http.StatusOK, "Hello world")
 		return nil
 	}
 }
