@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.toremo.petclinic.owner.api.event;
+
+option go_package = "github.com/spolab/petclinic/owner/pkg/api/event";
+
+import "schema/model.proto";
+
+// An event notifying that a new owner has been added to the practice
+message OwnerRegistered {
+    model.Owner owner = 1;
+}

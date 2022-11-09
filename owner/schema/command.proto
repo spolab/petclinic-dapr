@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.toremo.petclinic.owner.api.command;
+
+option go_package = "github.com/spolab/petclinic/owner/pkg/api/command";
+
+import "schema/model.proto";
+
+// Command to register a new owner
+message RegisterOwner {
+    model.Owner owner = 1;
+}
