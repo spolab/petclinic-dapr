@@ -31,8 +31,9 @@ message Phone {
 }
 
 message Owner {
-    Name name = 1;
-    Address address = 2;
-    Phone phone = 3;
-    string email = 4;
+    string id = 1;
+    Name name = 2;
+    Address address = 3;
+    Phone phone = 4;
+    string email = 5;
 }
