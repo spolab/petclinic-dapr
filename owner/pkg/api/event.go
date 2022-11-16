@@ -1,5 +1,8 @@
 package api
 
 type OwnerRegistered struct {
-	Owner
+	Id         string
+	Salutation string
+	Surname    string
+	Name       string
 }

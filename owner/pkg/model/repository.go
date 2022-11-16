@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	ce "github.com/cloudevents/sdk-go/v2"
 	"github.com/dapr/go-sdk/client"
 )
 
@@ -34,12 +35,14 @@ func (r *Repository) Save(ctx context.Context, owner *Owner) error {
 	if err := r.dapr.SaveState(ctx, r.appId, "owner-state", bytes, nil); err != nil {
 		return err
 	}
-	for _, event := range owner.Events {
+	for _, event := range owner.UncommittedEvents {
 		if err := r.dapr.PublishEvent(ctx, "owner-pubsub", r.topic, event); err != nil {
 			// TODO how do we tell which events have not been published?
 			return err
 		}
 	}
+	// Empty out the list of uncommitted events and exit
+	owner.UncommittedEvents = []ce.Event{}
 	return nil
 }
 

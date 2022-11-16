@@ -3,16 +3,19 @@ package model
 import (
 	"context"
 	"fmt"
-	"reflect"
 
+	ce "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
 	"github.com/spolab/petclinic/owner/pkg/api"
 )
 
+const OwnerRegisteredUrn = "spolab/petclinic/OwnerRegistered/v1"
+
 type Owner struct {
-	Id      string
-	Version string
-	Events  []any
-	State   struct {
+	Id                string
+	Version           string
+	UncommittedEvents []ce.Event
+	State             struct {
 		Salutation string
 		Surname    string
 		Name       string
@@ -20,17 +23,20 @@ type Owner struct {
 }
 
 // Apply is a method that alters the state of the aggregate based on the event provided
-func (o *Owner) Apply(ctx context.Context, rawEvent any) error {
-	switch event := rawEvent.(type) {
-	case api.OwnerRegistered:
-		o.Id = event.Id
-		o.State.Salutation = event.Salutation
-		o.State.Surname = event.Surname
-		o.State.Name = event.Name
+func (o *Owner) Apply(ctx context.Context, event ce.Event) error {
+	switch event.DataSchema() {
+	//
+	case OwnerRegisteredUrn:
+		var data api.OwnerRegistered
+		event.DataAs(&data)
+		o.Id = data.Id
+		o.State.Salutation = data.Salutation
+		o.State.Surname = data.Surname
+		o.State.Name = data.Name
+	//
 	default:
-		return fmt.Errorf("unknown event type '%s'", reflect.TypeOf(rawEvent).Name())
+		return fmt.Errorf("unknown event type '%s'", event.DataSchema())
 	}
-	o.Events = append(o.Events, rawEvent)
 	return nil
 }
 
@@ -42,10 +48,25 @@ func (s *Owner) Register(ctx context.Context, cmd *api.RegisterOwner) error {
 	if err := cmd.Validate(); err != nil {
 		return err
 	}
-	if err := s.Apply(ctx, api.OwnerRegistered{
-		Owner: cmd.Owner,
-	}); err != nil {
+	// Creates the cloudevent and applies it
+	// Apply the event and add it to the queue of uncommitted events
+	event := NewOwnerCreated(cmd.Id, cmd.Salutation, cmd.Surname, cmd.Name)
+	if err := s.Apply(ctx, event); err != nil {
 		return err
 	}
+	s.UncommittedEvents = append(s.UncommittedEvents, event)
 	return nil
+}
+
+func NewOwnerCreated(id string, salutation string, surname string, name string) ce.Event {
+	result := ce.NewEvent()
+	result.SetID(uuid.New().String())
+	result.SetDataSchema(OwnerRegisteredUrn)
+	result.SetData(ce.ApplicationJSON, api.OwnerRegistered{
+		Id:         id,
+		Salutation: salutation,
+		Surname:    surname,
+		Name:       name,
+	})
+	return result
 }
