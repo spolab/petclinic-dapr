@@ -31,11 +31,11 @@ func (r *Repository) Save(ctx context.Context, owner *Owner) error {
 	if err != nil {
 		return err
 	}
-	if err := r.dapr.SaveState(ctx, r.appId, owner.Id, bytes, nil); err != nil {
+	if err := r.dapr.SaveState(ctx, r.appId, "owner-state", bytes, nil); err != nil {
 		return err
 	}
 	for _, event := range owner.Events {
-		if err := r.dapr.PublishEvent(ctx, r.appId, r.topic, event); err != nil {
+		if err := r.dapr.PublishEvent(ctx, "owner-pubsub", r.topic, event); err != nil {
 			// TODO how do we tell which events have not been published?
 			return err
 		}
