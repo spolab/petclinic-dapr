@@ -18,7 +18,7 @@ func (r *Repository) GetById(ctx context.Context, id string) (*Owner, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := Owner{Id: id, Etag: state.Etag}
+	result := Owner{Id: id, Version: state.Etag}
 	if err := json.Unmarshal(state.Value, &result.State); err != nil {
 		return nil, err
 	}
