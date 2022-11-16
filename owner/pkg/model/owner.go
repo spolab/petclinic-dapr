@@ -9,10 +9,10 @@ import (
 )
 
 type Owner struct {
-	Id     string
-	Etag   string
-	Events []any
-	State  struct {
+	Id      string
+	Version string
+	Events  []any
+	State   struct {
 		Salutation string
 		Surname    string
 		Name       string
