@@ -39,6 +39,8 @@ func TestRegisterHappyPath(t *testing.T) {
 		Salutation: "salutation",
 		Surname:    "surname",
 		Name:       "name",
+		Phone:      "phone",
+		Email:      "foobar@baz.com",
 	}
 	instance.Register(context.TODO(), cmd)
 	// Inspect the contents of the aggregate root

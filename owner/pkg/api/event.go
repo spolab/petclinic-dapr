@@ -5,4 +5,6 @@ type OwnerRegistered struct {
 	Salutation string
 	Surname    string
 	Name       string
+	Phone      string
+	Email      string
 }

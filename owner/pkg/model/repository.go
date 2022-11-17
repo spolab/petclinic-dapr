@@ -9,13 +9,14 @@ import (
 )
 
 type Repository struct {
-	dapr  client.Client
-	appId string
-	topic string
+	dapr        client.Client
+	storeName   string
+	brokerName  string
+	brokerTopic string
 }
 
 func (r *Repository) GetById(ctx context.Context, id string) (*Owner, error) {
-	state, err := r.dapr.GetState(ctx, r.appId, id, nil)
+	state, err := r.dapr.GetState(ctx, r.storeName, id, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -27,16 +28,16 @@ func (r *Repository) GetById(ctx context.Context, id string) (*Owner, error) {
 }
 
 // Saves the state of the aggregate and emits all the new events
-func (r *Repository) Save(ctx context.Context, owner *Owner) error {
+func (r *Repository) Save(ctx context.Context, owner *Owner, so ...client.StateOption) error {
 	bytes, err := json.Marshal(owner.State)
 	if err != nil {
 		return err
 	}
-	if err := r.dapr.SaveState(ctx, r.appId, "owner-state", bytes, nil); err != nil {
+	if err := r.dapr.SaveState(ctx, r.storeName, owner.Id, bytes, nil, so...); err != nil {
 		return err
 	}
 	for _, event := range owner.UncommittedEvents {
-		if err := r.dapr.PublishEvent(ctx, "owner-pubsub", r.topic, event); err != nil {
+		if err := r.dapr.PublishEvent(ctx, r.brokerName, r.brokerTopic, event); err != nil {
 			// TODO how do we tell which events have not been published?
 			return err
 		}
@@ -46,9 +47,11 @@ func (r *Repository) Save(ctx context.Context, owner *Owner) error {
 	return nil
 }
 
-func NewRepository(c client.Client, id string) (*Repository, error) {
+func NewRepository(c client.Client, storeName string, brokerName string, brokerTopic string) (*Repository, error) {
 	return &Repository{
-		dapr:  c,
-		appId: id,
+		dapr:        c,
+		storeName:   storeName,
+		brokerName:  brokerName,
+		brokerTopic: brokerTopic,
 	}, nil
 }

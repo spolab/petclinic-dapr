@@ -19,6 +19,8 @@ type Owner struct {
 		Salutation string
 		Surname    string
 		Name       string
+		Phone      string
+		Email      string
 	}
 }
 
@@ -33,6 +35,8 @@ func (o *Owner) Apply(ctx context.Context, event ce.Event) error {
 		o.State.Salutation = data.Salutation
 		o.State.Surname = data.Surname
 		o.State.Name = data.Name
+		o.State.Phone = data.Phone
+		o.State.Email = data.Email
 	//
 	default:
 		return fmt.Errorf("unknown event type '%s'", event.DataSchema())

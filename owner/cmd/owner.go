@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/dapr/go-sdk/client"
 	"github.com/labstack/echo/v4"
@@ -15,6 +16,10 @@ import (
 var version string
 
 func main() {
+	stateStoreName := os.Getenv("STATESTORE_NAME")
+	pubsubName := os.Getenv("PUBSUB_NAME")
+	pubsubTopic := os.Getenv("PUBSUB_TOPIC")
+	log.Printf("Launch parameters: STATESTORE_NAME='%s', PUBSUB_NAME='%s', PUBSUBTOPIC='%s'", stateStoreName, pubsubName, pubsubTopic)
 	log.Printf("Starting owner microservice %s\n", version)
 	// Initialize the DAPR Client
 	dapr, err := client.NewClient()
@@ -22,7 +27,7 @@ func main() {
 		panic(err)
 	}
 	// Initialize the Owner repository
-	repo, err := model.NewRepository(dapr, "owner.petclinic")
+	repo, err := model.NewRepository(dapr, stateStoreName, pubsubName, pubsubTopic)
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +45,7 @@ func register(repo *model.Repository) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 		var cmd *api.RegisterOwner
-		if err := c.Bind(cmd); err != nil {
+		if err := c.Bind(&cmd); err != nil {
 			c.String(http.StatusBadRequest, err.Error())
 			return nil
 		}
@@ -49,7 +54,7 @@ func register(repo *model.Repository) echo.HandlerFunc {
 		}
 		owner := model.Owner{}
 		owner.Register(ctx, cmd)
-		if err := repo.Save(ctx, &owner); err != nil {
+		if err := repo.Save(ctx, &owner, client.WithConcurrency(client.StateConcurrencyFirstWrite)); err != nil {
 			c.String(http.StatusInternalServerError, err.Error())
 		}
 		c.NoContent(http.StatusCreated)
