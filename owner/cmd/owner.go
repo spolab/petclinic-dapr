@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -35,6 +36,7 @@ func main() {
 	app := echo.New()
 	app.HideBanner = true
 	app.POST("/register", register(repo))
+	app.POST("/registered", registered)
 	if err := app.Start(":3000"); err != nil {
 		panic(err)
 	}
@@ -60,4 +62,14 @@ func register(repo *model.Repository) echo.HandlerFunc {
 		c.NoContent(http.StatusCreated)
 		return nil
 	}
+}
+
+func registered(c echo.Context) error {
+	if b, err := io.ReadAll(c.Request().Body); err == nil {
+		log.Println(string(b))
+	} else {
+		log.Println(err)
+	}
+	c.NoContent(http.StatusOK)
+	return nil
 }
