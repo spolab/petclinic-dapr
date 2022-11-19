@@ -1,5 +1,7 @@
 package api
 
+const MetaEventType = "petclinic.spolab.github.com/eventType"
+
 type OwnerRegistered struct {
 	Id         string
 	Salutation string

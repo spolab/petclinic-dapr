@@ -3,9 +3,8 @@ package model
 import (
 	"context"
 	"fmt"
+	"reflect"
 
-	ce "github.com/cloudevents/sdk-go/v2"
-	"github.com/google/uuid"
 	"github.com/spolab/petclinic/owner/pkg/api"
 )
 
@@ -14,7 +13,7 @@ const OwnerRegisteredUrn = "spolab/petclinic/OwnerRegistered/v1"
 type Owner struct {
 	Id                string
 	Version           string
-	UncommittedEvents []ce.Event
+	UncommittedEvents []any
 	State             struct {
 		Salutation string
 		Surname    string
@@ -25,12 +24,10 @@ type Owner struct {
 }
 
 // Apply is a method that alters the state of the aggregate based on the event provided
-func (o *Owner) Apply(ctx context.Context, event ce.Event) error {
-	switch event.DataSchema() {
+func (o *Owner) Apply(ctx context.Context, event any) error {
+	switch data := event.(type) {
 	//
-	case OwnerRegisteredUrn:
-		var data api.OwnerRegistered
-		event.DataAs(&data)
+	case api.OwnerRegistered:
 		o.Id = data.Id
 		o.State.Salutation = data.Salutation
 		o.State.Surname = data.Surname
@@ -39,9 +36,18 @@ func (o *Owner) Apply(ctx context.Context, event ce.Event) error {
 		o.State.Email = data.Email
 	//
 	default:
-		return fmt.Errorf("unknown event type '%s'", event.DataSchema())
+		return fmt.Errorf("unknown event type '%s'", reflect.TypeOf(event))
 	}
 	return nil
+}
+
+// Append applies a new event to the aggregate root and appends it to the list of uncommitted events
+func (o *Owner) Append(ctx context.Context, event any) error {
+	err := o.Apply(ctx, event)
+	if err == nil {
+		o.UncommittedEvents = append(o.UncommittedEvents, event)
+	}
+	return err
 }
 
 // Register a new owner.
@@ -54,23 +60,13 @@ func (s *Owner) Register(ctx context.Context, cmd *api.RegisterOwner) error {
 	}
 	// Creates the cloudevent and applies it
 	// Apply the event and add it to the queue of uncommitted events
-	event := NewOwnerCreated(cmd.Id, cmd.Salutation, cmd.Surname, cmd.Name)
-	if err := s.Apply(ctx, event); err != nil {
-		return err
+	event := api.OwnerRegistered{
+		Id:         cmd.Id,
+		Salutation: cmd.Salutation,
+		Surname:    cmd.Surname,
+		Name:       cmd.Name,
+		Phone:      cmd.Phone,
+		Email:      cmd.Email,
 	}
-	s.UncommittedEvents = append(s.UncommittedEvents, event)
-	return nil
-}
-
-func NewOwnerCreated(id string, salutation string, surname string, name string) ce.Event {
-	result := ce.NewEvent()
-	result.SetID(uuid.New().String())
-	result.SetDataSchema(OwnerRegisteredUrn)
-	result.SetData(ce.ApplicationJSON, api.OwnerRegistered{
-		Id:         id,
-		Salutation: salutation,
-		Surname:    surname,
-		Name:       name,
-	})
-	return result
+	return s.Append(ctx, event)
 }

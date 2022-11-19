@@ -2,7 +2,6 @@ package model_test
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	ce "github.com/cloudevents/sdk-go/v2"
@@ -13,18 +12,13 @@ import (
 
 func TestApplyOwnerRegistered(t *testing.T) {
 	instance := model.Owner{}
-	instance.Apply(context.TODO(), model.NewOwnerCreated("id", "salutation", "surname", "name"))
+	instance.Apply(context.TODO(), api.OwnerRegistered{Id: "id", Salutation: "salutation", Surname: "surname", Name: "name", Phone: "phone", Email: "foo@bar.com"})
 	assert.Equal(t, "id", instance.Id)
 	assert.Equal(t, "salutation", instance.State.Salutation)
 	assert.Equal(t, "surname", instance.State.Surname)
 	assert.Equal(t, "name", instance.State.Name)
-}
-
-func TestNewOwnerCreated(t *testing.T) {
-	actual := model.NewOwnerCreated("id", "salutation", "surname", "name")
-	assert.Equal(t, "1.0", actual.SpecVersion())
-	assert.NotEmpty(t, actual.ID())
-	assert.Equal(t, "application/json", actual.DataContentType())
+	assert.Equal(t, "phone", instance.State.Phone)
+	assert.Equal(t, "foo@bar.com", instance.State.Email)
 }
 
 func TestUnknownEventReturnsError(t *testing.T) {
@@ -50,17 +44,12 @@ func TestRegisterHappyPath(t *testing.T) {
 	assert.Equal(t, "name", instance.State.Name)
 	assert.Equal(t, 1, len(instance.UncommittedEvents))
 	// Inspect the contents of the event
-	event := instance.UncommittedEvents[0]
-	assert.NotNil(t, event.ID())
-	assert.NotNil(t, "1.0", event.SpecVersion())
-	assert.NotNil(t, model.OwnerRegisteredUrn, event.DataSchema())
-	// Inspect the event payload
-	var data api.OwnerRegistered
-	assert.Nil(t, json.Unmarshal(event.Data(), &data))
-	assert.Equal(t, "id", data.Id)
-	assert.Equal(t, "salutation", data.Salutation)
-	assert.Equal(t, "surname", data.Surname)
-	assert.Equal(t, "name", data.Name)
+	event, ok := instance.UncommittedEvents[0].(api.OwnerRegistered)
+	assert.True(t, ok)
+	assert.Equal(t, "id", event.Id)
+	assert.Equal(t, "salutation", event.Salutation)
+	assert.Equal(t, "surname", event.Surname)
+	assert.Equal(t, "name", event.Name)
 }
 
 func TestRegisterWithNilCommandReturnsError(t *testing.T) {
