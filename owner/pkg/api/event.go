@@ -1,6 +1,6 @@
 package api
 
-const MetaEventType = "petclinic.spolab.github.com/eventType"
+const MetaEventType = "X-Event-Type"
 
 type OwnerRegistered struct {
 	Id         string

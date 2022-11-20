@@ -4,30 +4,39 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"time"
 
+	ce "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
 	"github.com/spolab/petclinic/owner/pkg/api"
 )
 
-const OwnerRegisteredUrn = "spolab/petclinic/OwnerRegistered/v1"
+const OwnerRegisteredType = "spolab/petclinic/OwnerRegistered/v1"
 
 type Owner struct {
-	Id                string
-	Version           string
-	UncommittedEvents []any
+	Id      string `json:"id"`
+	Version string `json:"version"`
+	// TODO better to use a pointer to events or a copy of the events?
+	UncommittedEvents []ce.Event
 	State             struct {
-		Salutation string
-		Surname    string
-		Name       string
-		Phone      string
-		Email      string
-	}
+		Salutation string `json:"salutation"`
+		Surname    string `json:"surname"`
+		Name       string `json:"name"`
+		Phone      string `json:"phone"`
+		Email      string `json:"email"`
+	} `json:"state"`
 }
 
 // Apply is a method that alters the state of the aggregate based on the event provided
-func (o *Owner) Apply(ctx context.Context, event any) error {
-	switch data := event.(type) {
+// TODO do we need context here? there should never be any input/output here
+func (o *Owner) Apply(ctx context.Context, event ce.Event) error {
+	switch event.Type() {
 	//
-	case api.OwnerRegistered:
+	case OwnerRegisteredType:
+		var data api.OwnerRegistered
+		if err := event.DataAs(&data); err != nil {
+			return err
+		}
 		o.Id = data.Id
 		o.State.Salutation = data.Salutation
 		o.State.Surname = data.Surname
@@ -42,7 +51,7 @@ func (o *Owner) Apply(ctx context.Context, event any) error {
 }
 
 // Append applies a new event to the aggregate root and appends it to the list of uncommitted events
-func (o *Owner) Append(ctx context.Context, event any) error {
+func (o *Owner) Append(ctx context.Context, event ce.Event) error {
 	err := o.Apply(ctx, event)
 	if err == nil {
 		o.UncommittedEvents = append(o.UncommittedEvents, event)
@@ -68,5 +77,17 @@ func (s *Owner) Register(ctx context.Context, cmd *api.RegisterOwner) error {
 		Phone:      cmd.Phone,
 		Email:      cmd.Email,
 	}
-	return s.Append(ctx, event)
+	return s.Append(ctx, BuildEvent(OwnerRegisteredType, "owner", event))
+}
+
+func BuildEvent(kind string, source string, data any) ce.Event {
+	result := ce.NewEvent()
+	result.SetSpecVersion(ce.VersionV1)
+	result.SetID(uuid.NewString())
+	result.SetType(kind)
+	result.SetTime(time.Now())
+	result.SetSource(source)
+	result.SetDataContentEncoding(ce.EncodingStructured.String())
+	result.SetData(ce.ApplicationJSON, data)
+	return result
 }

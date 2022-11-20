@@ -8,18 +8,8 @@ import (
 	"github.com/spolab/petclinic/owner/pkg/api"
 	"github.com/spolab/petclinic/owner/pkg/model"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
-
-func TestApplyOwnerRegistered(t *testing.T) {
-	instance := model.Owner{}
-	instance.Apply(context.TODO(), api.OwnerRegistered{Id: "id", Salutation: "salutation", Surname: "surname", Name: "name", Phone: "phone", Email: "foo@bar.com"})
-	assert.Equal(t, "id", instance.Id)
-	assert.Equal(t, "salutation", instance.State.Salutation)
-	assert.Equal(t, "surname", instance.State.Surname)
-	assert.Equal(t, "name", instance.State.Name)
-	assert.Equal(t, "phone", instance.State.Phone)
-	assert.Equal(t, "foo@bar.com", instance.State.Email)
-}
 
 func TestUnknownEventReturnsError(t *testing.T) {
 	instance := model.Owner{}
@@ -36,20 +26,25 @@ func TestRegisterHappyPath(t *testing.T) {
 		Phone:      "phone",
 		Email:      "foobar@baz.com",
 	}
-	instance.Register(context.TODO(), cmd)
+	require.Nil(t, instance.Register(context.TODO(), cmd))
 	// Inspect the contents of the aggregate root
 	assert.Equal(t, "id", instance.Id)
 	assert.Equal(t, "salutation", instance.State.Salutation)
 	assert.Equal(t, "surname", instance.State.Surname)
 	assert.Equal(t, "name", instance.State.Name)
+	assert.Equal(t, "phone", instance.State.Phone)
+	assert.Equal(t, "foobar@baz.com", instance.State.Email)
 	assert.Equal(t, 1, len(instance.UncommittedEvents))
 	// Inspect the contents of the event
-	event, ok := instance.UncommittedEvents[0].(api.OwnerRegistered)
-	assert.True(t, ok)
-	assert.Equal(t, "id", event.Id)
-	assert.Equal(t, "salutation", event.Salutation)
-	assert.Equal(t, "surname", event.Surname)
-	assert.Equal(t, "name", event.Name)
+	event := instance.UncommittedEvents[0]
+	var data api.OwnerRegistered
+	require.Nil(t, event.DataAs(&data))
+	assert.Equal(t, "id", data.Id)
+	assert.Equal(t, "salutation", data.Salutation)
+	assert.Equal(t, "surname", data.Surname)
+	assert.Equal(t, "name", data.Name)
+	assert.Equal(t, "phone", data.Phone)
+	assert.Equal(t, "foobar@baz.com", data.Email)
 }
 
 func TestRegisterWithNilCommandReturnsError(t *testing.T) {

@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -81,8 +80,9 @@ func register(logger *zap.Logger, repo *model.Repository) echo.HandlerFunc {
 // this method listens for the ownercreated event and updates the read-only cache
 func registered(logger *zap.Logger, dapr client.Client) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		logger.Info("I am getting here")
 		if event, err := ce.NewEventFromHTTPRequest(c.Request()); err == nil {
-			fmt.Printf("Response from callback %v", event)
+			logger.Info("Response from callback", zap.Any("event", event))
 		} else {
 			logger.Warn("Receiving incorrect data from the subscription", zap.Error(err))
 		}

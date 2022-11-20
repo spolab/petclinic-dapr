@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"reflect"
 
+	ce "github.com/cloudevents/sdk-go/v2"
 	"github.com/dapr/go-sdk/client"
 	"github.com/spolab/petclinic/owner/pkg/api"
 )
@@ -40,13 +41,13 @@ func (r *Repository) Save(ctx context.Context, owner *Owner, so ...client.StateO
 	meta := make(map[string]string)
 	for _, event := range owner.UncommittedEvents {
 		meta[api.MetaEventType] = reflect.TypeOf(event).Name()
-		if err := r.dapr.PublishEvent(ctx, r.brokerName, r.brokerTopic, event, client.PublishEventWithMetadata(meta)); err != nil {
+		if err := r.dapr.PublishEvent(ctx, r.brokerName, r.brokerTopic, event, client.PublishEventWithContentType(ce.ApplicationCloudEventsJSON)); err != nil {
 			// TODO how do we tell which events have not been published?
 			return err
 		}
 	}
 	// Empty out the list of uncommitted events and exit
-	owner.UncommittedEvents = []any{}
+	owner.UncommittedEvents = []ce.Event{}
 	return nil
 }
 
