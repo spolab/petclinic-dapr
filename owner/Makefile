@@ -1,4 +1,4 @@
-.PHONY: schema build image clean
+.PHONY: schema build image clean test
 
 VERSION = v0.0.2
 DIR_GEN = pkg/api
@@ -20,3 +20,6 @@ schema:
 
 clean:
 	rm -Rf bin/ $(DIR_GEN)/command $(DIR_GEN)/model $(DIR_GEN)/event $(DIR_BIN)
+
+test:
+	dapr run --app-id owner --components-path dapr/test go test ./...

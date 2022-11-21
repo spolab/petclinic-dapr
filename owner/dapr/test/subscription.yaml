@@ -1,0 +1,10 @@
+apiVersion: dapr.io/v1alpha1
+kind: Subscription
+metadata:
+  name: owner-subscription
+spec:
+  topic: owner
+  route: /registered
+  pubsubname: owner-pubsub
+scopes:
+  - owner
