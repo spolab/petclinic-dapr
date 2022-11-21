@@ -11,7 +11,7 @@ import (
 )
 
 // Tests the save of an aggregate root with one event
-func TestSaveHappyPath(t *testing.T) {
+func TestCreateOK(t *testing.T) {
 	c, err := client.NewClient()
 	require.Nil(t, err)
 	repo, err := model.NewRepository(c, "owner-state", "owner-pubsub", "owner")
@@ -20,5 +20,9 @@ func TestSaveHappyPath(t *testing.T) {
 	aggregate := model.Owner{
 		Id: "id",
 	}
-	assert.Nil(t, repo.Save(context.TODO(), &aggregate))
+	assert.Nil(t, repo.Create(context.TODO(), &aggregate))
+	// Expect that I can load the same aggregage and find it the same
+	actual, err := repo.GetById(context.TODO(), "id")
+	require.Nil(t, err)
+	require.NotNil(t, actual)
 }

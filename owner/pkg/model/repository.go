@@ -29,8 +29,13 @@ func (r *Repository) GetById(ctx context.Context, id string) (*Owner, error) {
 	return &result, nil
 }
 
+// Create will try and store the state of the owner, but will fail is another one with the same ID exists already
+func (r *Repository) Create(ctx context.Context, owner *Owner) error {
+	return r.save(ctx, owner, client.WithConcurrency(client.StateConcurrencyFirstWrite))
+}
+
 // Saves the state of the aggregate and emits all the new events
-func (r *Repository) Save(ctx context.Context, owner *Owner, so ...client.StateOption) error {
+func (r *Repository) save(ctx context.Context, owner *Owner, so ...client.StateOption) error {
 	bytes, err := json.Marshal(owner.State)
 	if err != nil {
 		return err

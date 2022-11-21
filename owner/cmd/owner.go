@@ -67,7 +67,7 @@ func register(logger *zap.Logger, repo *model.Repository) echo.HandlerFunc {
 		// TODO - this should not happen. It should be a clerk that registers - we will change the code when we will have authentication in place
 		owner := model.Owner{}
 		owner.Register(ctx, cmd)
-		if err := repo.Save(ctx, &owner, client.WithConcurrency(client.StateConcurrencyFirstWrite)); err != nil {
+		if err := repo.Create(ctx, &owner); err != nil {
 			logger.Error("Saving the owner state", zap.Error(err))
 			c.String(http.StatusInternalServerError, err.Error())
 		}
