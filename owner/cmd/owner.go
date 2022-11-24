@@ -20,30 +20,35 @@ func main() {
 	stateStoreName := os.Getenv("STATESTORE_NAME")
 	pubsubName := os.Getenv("PUBSUB_NAME")
 	pubsubTopic := os.Getenv("PUBSUB_TOPIC")
+	//
 	// Initialize logging
 	logger, err := zap.NewProduction()
 	if err != nil {
 		panic(err)
 	}
 	defer logger.Sync()
+	//
 	// Announces the bootstrap of the microservice
 	logger.Info("Starting Owner Microservice", zap.String("version", version), zap.String("STATESTORE_NAM£", stateStoreName), zap.String("PUBSUB_NAME", pubsubName), zap.String("PUBSUBTOPIC", pubsubTopic))
+	//
 	// Initialize the DAPR Client
 	dapr, err := client.NewClient()
 	if err != nil {
 		logger.Panic("Error initializing the Dapr client", zap.Error(err))
 	}
+	//
 	// Initialize the Owner repository
 	repo, err := model.NewRepository(dapr, stateStoreName, pubsubName, pubsubTopic)
 	if err != nil {
 		logger.Panic("Error initializing the Owner repository", zap.Error(err))
 	}
+	//
 	// Setup the API Endpoint
 	app := echo.New()
 	app.HideBanner = true
 	app.POST("/register", register(logger, repo))
 	app.POST("/registered", registered(logger, dapr))
-	if err := app.Start(":3000"); err != nil {
+	if err := app.Start("localhost:3000"); err != nil {
 		panic(err)
 	}
 }

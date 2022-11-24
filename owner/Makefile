@@ -21,5 +21,5 @@ schema:
 clean:
 	rm -Rf bin/ $(DIR_GEN)/command $(DIR_GEN)/model $(DIR_GEN)/event $(DIR_BIN)
 
-test:
-	dapr run --app-id owner --components-path dapr/test --log-level debug go test ./...
+run:
+	dapr run --app-id owner --app-port 3000 --dapr-grpc-port 5000 --components-path dapr/test go run cmd/owner.go
