@@ -8,11 +8,10 @@ PROTOC = protoc --go_out=. --go_opt=module=github.com/spolab/petclinic/owner --g
 FILE_OUT = $(DIR_BIN)/app
 
 image: build
-	nerdctl build --namespace k8s.io -f docker/Dockerfile --tag spolab/petclinic-owner:$(VERSION) .
+	docker build -f docker/Dockerfile --tag spolab/petclinic-owner:$(VERSION) .
 
 build: schema
 	go vet ./...
-	go test ./...
 	cd cmd && go build -o ../$(FILE_OUT) .
 
 schema:
