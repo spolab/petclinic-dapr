@@ -19,13 +19,11 @@ kind: Component
 metadata:
   name: state-owner
 spec:
-  type: state.redis
+  type: state.mongodb
   version: v1
   metadata:
-  - name: redisHost
-    value: redis-headless.redis:6379
-  - name: actorStateStore
-    value: "true"    
+  - name: server
+    value: mongodb.mongodb
 ---
 apiVersion: apps/v1
 kind: Deployment
