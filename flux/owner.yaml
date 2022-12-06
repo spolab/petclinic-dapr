@@ -43,7 +43,6 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/app-id: petclinic
         dapr.io/app-port: "3000"
-        dapr.io/app-health-check-path: /ping
     spec:
       containers:
       - name: petclinic-owner
