@@ -4,6 +4,7 @@ metadata:
   name: petclinic
   labels:
     name: petclinic
+spec:
   rules:
   - host: petclinic.127.0.0.1.nip.io
     http:
@@ -14,4 +15,4 @@ metadata:
           service:
             name: petclinic-dapr
             port: 
-              name: 80
+              number: 80
