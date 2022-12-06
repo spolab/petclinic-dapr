@@ -12,7 +12,7 @@ spec:
   - name: consumerID
     value: "owner"
   - name: enableTLS
-    value: "false"
+    value: "false"    
 ---
 apiVersion: dapr.io/v1alpha1
 kind: Component
@@ -24,6 +24,8 @@ spec:
   metadata:
   - name: server
     value: mongodb.mongodb
+  - name: actorStateStore
+    value: "true"    
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -37,6 +39,11 @@ spec:
     metadata:
       labels:
         app: petclinic-owner
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: petclinic
+        dapr.io/app-port: "3000"
+        dapr.io/app-health-check-path: /ping
     spec:
       containers:
       - name: petclinic-owner
@@ -45,3 +52,8 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
+        env:
+          - name: PUBSUB_NAME
+            value: pubsub-owner
+          - name: PUBSUB_TOPIC
+            value: owner
