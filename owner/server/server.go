@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/dapr/go-sdk/actor"
 	"github.com/dapr/go-sdk/client"
+	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 )
 
@@ -13,13 +14,18 @@ const (
 
 type OwnerActor struct {
 	actor.ServerImplBase
-	logger *zap.Logger
-	dapr   client.Client
+	logger   *zap.Logger
+	dapr     client.Client
+	validate *validator.Validate
+	broker   string
+	topic    string
 }
 
-func OwnerActorFactory(logger *zap.Logger, dapr client.Client) actor.Factory {
+// OwnerActorFactory is a
+func OwnerActorFactory(logger *zap.Logger, dapr client.Client, broker string, topic string) actor.Factory {
 	return func() actor.Server {
-		return &OwnerActor{logger: logger, dapr: dapr}
+		// TODO should I be injecting the validator too?
+		return &OwnerActor{logger: logger, dapr: dapr, validate: validator.New(), broker: broker, topic: topic}
 	}
 }
 

@@ -1,0 +1,49 @@
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub-owner
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: localhost:6379
+  - name: consumerID
+    value: "owner"
+  - name: enableTLS
+    value: "false"
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: state-owner
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: redis-headless.redis:6379
+  - name: actorStateStore
+    value: "true"    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic-owner
+spec:
+  selector:
+    matchLabels:
+      app: petclinic-owner
+  template:
+    metadata:
+      labels:
+        app: petclinic-owner
+    spec:
+      containers:
+      - name: petclinic-owner
+        image: spolab/petclinic-owner:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"

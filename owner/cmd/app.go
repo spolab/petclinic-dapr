@@ -14,9 +14,8 @@ import (
 var revision string
 
 func main() {
-	stateStoreName := os.Getenv("STATESTORE_NAME")
-	pubsubName := os.Getenv("PUBSUB_NAME")
-	pubsubTopic := os.Getenv("PUBSUB_TOPIC")
+	pubsub := os.Getenv("PUBSUB_NAME")
+	topic := os.Getenv("PUBSUB_TOPIC")
 	//
 	// Initialize logging
 	//
@@ -28,7 +27,7 @@ func main() {
 	//
 	// Announces the bootstrap of the microservice
 	//
-	logger.Info("Starting Owner Microservice", zap.String("revision", revision), zap.String("statestore_name", stateStoreName), zap.String("pubsub_name", pubsubName), zap.String("pubsub_topic", pubsubTopic))
+	logger.Info("starting owner microservice", zap.String("revision", revision), zap.String("pubsub", pubsub), zap.String("topic", topic))
 	//
 	// Initialize the DAPR Client
 	//
@@ -41,7 +40,7 @@ func main() {
 	// Initialize the command actor factory
 	//
 	service := daprd.NewService("127.0.0.1:3000")
-	service.RegisterActorImplFactory(server.OwnerActorFactory(logger, dapr))
+	service.RegisterActorImplFactory(server.OwnerActorFactory(logger, dapr, pubsub, topic))
 	//
 	// Start the server
 	//
