@@ -4,15 +4,13 @@ kind: Component
 metadata:
   name: pubsub-owner
 spec:
-  type: pubsub.redis
+  type: pubsub.kafka
   version: v1
   metadata:
-  - name: redisHost
-    value: localhost:6379
-  - name: consumerID
-    value: "owner"
-  - name: enableTLS
-    value: "false"    
+  - name: brokers 
+    value: "kafka-headless.kafka:9092"
+  - name: consumerGroup 
+    value: "petclinic-owner"  
 ---
 apiVersion: dapr.io/v1alpha1
 kind: Component
