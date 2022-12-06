@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: petclinic
   labels:
-    name: petclinic.127.0.0.1.nip.io
+    name: petclinic
   rules:
   - host: petclinic.127.0.0.1.nip.io
     http:
