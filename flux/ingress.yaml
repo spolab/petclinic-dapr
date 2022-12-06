@@ -4,6 +4,8 @@ metadata:
   name: petclinic
   labels:
     name: petclinic
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
 spec:
   rules:
   - host: petclinic.127.0.0.1.nip.io
