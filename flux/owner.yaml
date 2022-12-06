@@ -41,7 +41,7 @@ spec:
         app: petclinic-owner
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/app-id: petclinic
+        dapr.io/app-id: petclinic-owner
         dapr.io/app-port: "3000"
     spec:
       containers:
