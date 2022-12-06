@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: petclinic
+  labels:
+    name: petclinic.127.0.0.1.nip.io
+  rules:
+  - host: petclinic.127.0.0.1.nip.io
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: petclinic-dapr
+            port: 
+              name: 80
