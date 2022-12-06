@@ -17,4 +17,4 @@ spec:
           service:
             name: petclinic-dapr
             port: 
-              number: 80
+              number: 3500
