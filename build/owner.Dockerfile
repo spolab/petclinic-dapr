@@ -14,4 +14,4 @@ ARG DIR_BUILD=/build
 ARG DIR_BIN=/usr/bin
 RUN apk add --no-cache gcompat
 COPY --from=build ${DIR_BUILD}/bin/owner ${DIR_BIN}
-ENTRYPOINT {"${DIR_BIN}/owner"}
+ENTRYPOINT ["owner"]

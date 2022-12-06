@@ -47,6 +47,7 @@ spec:
       containers:
       - name: petclinic-owner
         image: spolab/petclinic-owner:latest
+        imagePullPolicy: Never
         resources:
           limits:
             memory: "128Mi"

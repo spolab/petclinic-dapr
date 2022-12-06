@@ -10,5 +10,5 @@ import (
 
 // builds the owner microservice
 func Owner(ctx context.Context) error {
-	return sh.Run("docker", "build", "-f", "owner.Dockerfile", "..")
+	return sh.Run("docker", "build", "-f", "owner.Dockerfile", "-t", "spolab/petclinic-owner:latest", "..")
 }
