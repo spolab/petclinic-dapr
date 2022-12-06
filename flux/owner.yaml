@@ -22,8 +22,8 @@ spec:
   type: state.mongodb
   version: v1
   metadata:
-  - name: server
-    value: mongodb.mongodb
+  - name: host
+    value: mongodb.mongodb:27017
   - name: actorStateStore
     value: "true"    
 ---
