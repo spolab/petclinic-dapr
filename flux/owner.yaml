@@ -11,6 +11,8 @@ spec:
     value: "kafka-headless.kafka:9092"
   - name: consumerGroup 
     value: "petclinic-owner"  
+  - name: authType
+    value: none
 ---
 apiVersion: dapr.io/v1alpha1
 kind: Component
