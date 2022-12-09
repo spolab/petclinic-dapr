@@ -60,3 +60,5 @@ spec:
             value: pubsub-owner
           - name: PUBSUB_TOPIC
             value: owner
+          - name: STORE_NAME
+            value: state-owner
