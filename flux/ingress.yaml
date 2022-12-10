@@ -1,20 +1,26 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+# Redirect with domain replacement
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: owner-register-rewrite
+spec:
+  replacePathRegex:
+    regex: /(.*)
+    replacement: /v1.0/actors/owner/${1}/method/Register
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
   name: petclinic
-  labels:
-    name: petclinic
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
 spec:
-  rules:
-  - host: petclinic.127.0.0.1.nip.io
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: petclinic-dapr
-            port: 
-              name: dapr-http
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host('petclinic.127.0.0.1.nip.io') && Path('/owner') && Method('PUT')
+      middlewares:
+        - name: owner-register-rewrite
+      services:
+        - name: petclinic-dapr
+          port: dapr-http
