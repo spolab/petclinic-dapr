@@ -18,7 +18,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host('petclinic.127.0.0.1.nip.io') && Path('/owner') && Method('PUT')
+      match: Host('petclinic.127.0.0.1.nip.io') && PathPrefix('/owner') && Method('PUT')
       middlewares:
         - name: owner-register-rewrite
       services:
