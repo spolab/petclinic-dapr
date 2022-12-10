@@ -8,6 +8,5 @@ RUN apk update && \
 RUN adduser -D -h ${DIR_HOME} builder
 USER builder
 WORKDIR ${DIR_HOME}
+RUN ls -la
 RUN go install -buildvcs=true github.com/magefile/mage@latest
-RUN echo "export PATH=$PATH:~/go/bin" >> ${DIR_HOME}/.ashrc
-ENV ENV="${DIR_HOME}/.ashrc"

@@ -12,13 +12,13 @@ ARG FILE_MAIN
 
 FROM spolab/toolbox:latest AS build
 
-COPY . ./
-RUN INPUT=${FILE_MAIN} mage -d build
+COPY --chown=builder:builder . ./
+RUN go build -o bin/actor owner/cmd/actor.go
 
 FROM alpine:3.16
 
 RUN adduser -D runner
 RUN apk add --no-cache gcompat
-COPY --from=build /build/bin/app /usr/local/bin
+COPY --from=build /build/bin/actor /usr/local/bin
 USER runner 
-ENTRYPOINT ["app"]
+ENTRYPOINT ["actor"]

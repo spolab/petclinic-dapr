@@ -8,17 +8,12 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-// builds the owner microservice
+// build the owner image (spolab/petclinic-owner)
 func Owner(ctx context.Context) error {
-	//
-	// Execute the Docker build
-	//
-	return sh.Run("docker", "build", "-f", "build/owner.Dockerfile", "-t", "spolab/petclinic-owner:latest", ".")
+	return sh.Run("docker", "build", "-f", "owner/docker/Dockerfile", "-t", "spolab/petclinic-owner:latest", ".")
 }
 
+// build the toolbox image (spolab/toolbox)
 func Toolbox(ctx context.Context) error {
-	//
-	// Execute the Docker build
-	//
-	return sh.Run("docker", "build", "-f", "build/toolbox.Dockerfile", "-t", "spolab/toolbox:latest", "build")
+	return sh.Run("docker", "build", "-t", "spolab/toolbox:latest", "toolbox")
 }
