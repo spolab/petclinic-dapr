@@ -4,30 +4,24 @@ kind: Component
 metadata:
   name: pubsub-owner
 spec:
-  type: pubsub.kafka
+  type: pubsub.redis
   version: v1
   metadata:
-  - name: brokers 
-    value: "kafka-headless.kafka:9092"
-  - name: consumerGroup 
-    value: "petclinic-owner"  
-  - name: authType
-    value: none
+  - name: redisHost
+    value: redis-headless.redis:6379
+  - name: consumerID
+    value: petclinic-owner
 ---
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
   name: state-owner
 spec:
-  type: state.mongodb
+  type: state.redis
   version: v1
   metadata:
-  - name: host
-    value: mongodb-headless.mongodb:27017
-  - name: databaseName
-    value: petclinic
-  - name: actorStateStore
-    value: "true"    
+  - name: redisHost
+    value: redis-headless.redis:6379
 ---
 apiVersion: apps/v1
 kind: Deployment
