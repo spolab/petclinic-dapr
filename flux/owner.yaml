@@ -22,6 +22,8 @@ spec:
   metadata:
   - name: redisHost
     value: redis-headless.redis:6379
+  - name: actorStateStore
+    value: true
 ---
 apiVersion: apps/v1
 kind: Deployment
