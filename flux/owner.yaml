@@ -41,6 +41,7 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/app-id: petclinic-owner
         dapr.io/app-port: "3000"
+        dapr.io/enable-metrics: "true"
         dapr.io/sidecar-listen-addresses: 0.0.0.0,[::]
     spec:
       containers:
