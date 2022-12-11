@@ -13,6 +13,6 @@ spec:
         path: "/"
         backend:
           service:
-            name: petclinic-dapr
+            name: petclinic-owner-dapr
             port: 
               name: dapr-http
