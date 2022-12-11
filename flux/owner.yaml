@@ -28,26 +28,25 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: petclinic-owner
+  name: petclinic-owner-actor
 spec:
   selector:
     matchLabels:
-      app: petclinic-owner
+      app: petclinic-owner-actor
   template:
     metadata:
       labels:
-        app: petclinic-owner
+        app: petclinic-owner-actor
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/app-id: petclinic-owner
+        dapr.io/app-id: petclinic-owner-actor
         dapr.io/app-port: "3000"
         dapr.io/enable-metrics: "true"
-        dapr.io/sidecar-listen-addresses: 0.0.0.0,[::]
         dapr.io/config: "tracing"
     spec:
       containers:
       - name: petclinic-owner
-        image: spolab/petclinic-owner:latest
+        image: spolab/petclinic-owner-actor:latest
         imagePullPolicy: Never
         resources:
           limits:
@@ -60,3 +59,31 @@ spec:
             value: owner
           - name: STORE_NAME
             value: state-owner
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic-owner-api
+spec:
+  selector:
+    matchLabels:
+      app: petclinic-owner-api
+  template:
+    metadata:
+      labels:
+        app: petclinic-owner-api
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: petclinic-owner-api
+        dapr.io/app-port: "3000"
+        dapr.io/enable-metrics: "true"
+        dapr.io/sidecar-listen-addresses: 0.0.0.0,[::]
+        dapr.io/config: "tracing"
+    spec:
+      containers:
+      - name: owner-ui
+        image: spolab/petclinic-owner-api:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"

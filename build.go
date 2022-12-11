@@ -13,17 +13,17 @@ type Owner mg.Namespace
 
 // build the owner image (spolab/petclinic-owner-actor)
 func (Owner) Actor(ctx context.Context) error {
-	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/actor/actor.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petclinic-owner:latest", ".")
+	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/actor/actor.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petclinic-owner-actor:latest", ".")
 }
 
 // build the owner image (spolab/petclinic-owner-ui)
-func (Owner) Ui(ctx context.Context) error {
-	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/api/api.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petclinic-owner:latest", ".")
+func (Owner) Api(ctx context.Context) error {
+	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/api/api.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petclinic-owner-api:latest", ".")
 }
 
 // build all the owner services
 func (Owner) All() {
-	mg.Deps(Owner.Actor, Owner.Ui)
+	mg.Deps(Owner.Actor, Owner.Api)
 }
 
 // build the toolbox image (spolab/toolbox)
