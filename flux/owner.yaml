@@ -45,7 +45,7 @@ spec:
         dapr.io/config: "tracing"
     spec:
       containers:
-      - name: petclinic-owner
+      - name: petclinic-owner-actor
         image: spolab/petclinic-owner-actor:latest
         imagePullPolicy: Never
         resources:
@@ -81,7 +81,7 @@ spec:
         dapr.io/config: "tracing"
     spec:
       containers:
-      - name: owner-ui
+      - name: petclinic-owner-api
         image: spolab/petclinic-owner-api:latest
         imagePullPolicy: Never
         resources:
