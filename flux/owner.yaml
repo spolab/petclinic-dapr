@@ -52,6 +52,8 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
+        ports:
+        - containerPort: 3000
         env:
           - name: PUBSUB_NAME
             value: pubsub-owner
@@ -88,3 +90,41 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
+        ports:
+        - containerPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic-owner-ui
+spec:
+  selector:
+    matchLabels:
+      app: petclinic-owner-ui
+  template:
+    metadata:
+      labels:
+        app: petclinic-owner-ui
+    spec:
+      containers:
+      - name: petclinic-owner-ui
+        image: spolab/petclinic-owner-ui
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinic-owner-ui
+spec:
+  selector:
+    app: petclinic-owner-ui
+  ports:
+  - port: 80
+    targetPort: http
+    name: http

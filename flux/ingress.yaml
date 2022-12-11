@@ -10,9 +10,16 @@ spec:
     http:
       paths:
       - pathType: Prefix
-        path: "/"
+        path: "/owner/api"
         backend:
           service:
             name: petclinic-owner-api-dapr
+            port: 
+              name: dapr-http
+      - pathType: Prefix
+        path: "/owner/"
+        backend:
+          service:
+            name: petclinic-owner-ui-dapr
             port: 
               name: dapr-http
