@@ -20,6 +20,6 @@ spec:
         path: "/owner/"
         backend:
           service:
-            name: petclinic-owner-ui-dapr
+            name: petclinic-owner-ui
             port: 
-              name: dapr-http
+              name: http

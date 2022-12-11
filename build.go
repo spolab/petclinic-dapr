@@ -21,9 +21,14 @@ func (Owner) Api(ctx context.Context) error {
 	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/api/api.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petclinic-owner-api:latest", ".")
 }
 
+// build the owner image (spolab/petclinic-owner-ui)
+func (Owner) Ui(ctx context.Context) error {
+	return sh.Run("ui/npm", "run", "build")
+}
+
 // build all the owner services
 func (Owner) All() {
-	mg.Deps(Owner.Actor, Owner.Api)
+	mg.Deps(Owner.Actor, Owner.Ui)
 }
 
 // build the toolbox image (spolab/toolbox)
