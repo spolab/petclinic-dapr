@@ -8,7 +8,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`petclinic.127.0.0.1.nip.io`) && PathPrefix(`/petclinic/api`)
+      match: Host(`petclinic.127.0.0.1.nip.io`) && PathPrefix(`/owner/api`)
       priority: 20
       services:
         - name: petclinic-owner-api-dapr
