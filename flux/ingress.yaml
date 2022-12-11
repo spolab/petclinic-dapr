@@ -14,7 +14,7 @@ spec:
       match: Host(`owner.petclinic.127.0.0.1.nip.io`) && PathPrefix(`/v1.0`)
       priority: 20
       services:
-        - name: petclinic-owner-api-dapr
+        - name: owner-api-dapr
           port: dapr-http
     # ----------------------------------------------------------------------------------------------------
     # Catch-all rule that routes any unknown subpath to the UI. This has to be the lowest priority of all.
@@ -23,5 +23,5 @@ spec:
       match: Host(`owner.petclinic.127.0.0.1.nip.io`)
       priority: 10
       services:
-        - name: petclinic-owner-ui
+        - name: owner-ui
           port: http          
