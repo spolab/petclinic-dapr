@@ -1,26 +1,18 @@
-# Redirect with domain replacement
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: owner-register-rewrite
-spec:
-  replacePathRegex:
-    regex: /owner/(.*)
-    replacement: /v1.0/actors/owner/${1}/method/Register
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: petclinic
+  labels:
+    name: petclinic
 spec:
-  entryPoints:
-    - web
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`petclinic.127.0.0.1.nip.io`) && PathPrefix(`/owner/{id:.+}`) && Method(`PUT`)
-      middlewares:
-        - name: owner-register-rewrite
-      services:
-        - name: petclinic-dapr
-          port: dapr-http
+  rules:
+  - host: petclinic.127.0.0.1.nip.io
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: petclinic-dapr
+            port: 
+              name: dapr-http
