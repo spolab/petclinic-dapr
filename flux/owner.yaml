@@ -83,6 +83,7 @@ spec:
       containers:
       - name: owner-ui
         image: spolab/petclinic-owner-api:latest
+        imagePullPolicy: Never
         resources:
           limits:
             memory: "128Mi"
