@@ -23,7 +23,10 @@ func (Owner) Api(ctx context.Context) error {
 
 // build the owner image (spolab/petclinic-owner-ui)
 func (Owner) Ui(ctx context.Context) error {
-	return sh.Run("ui/npm", "run", "build")
+	if err := sh.Run("npm", "--prefix", "owner/ui", "run", "build"); err != nil {
+		return err
+	}
+	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "-f", "owner/ui/Dockerfile", "-t", "spolab/petclinic-owner-ui:latest", "owner/ui")
 }
 
 // build all the owner services
