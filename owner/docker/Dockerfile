@@ -4,21 +4,23 @@
 #  - Vetting
 #  - Security scan using Trivy
 # Arguments:
-#  - FILE_MAIN: the file identifying the main programme
-#  - FILE
+#  - FILE_SRC: the name of the source file
 # ==================================================================================================================================
 
-ARG FILE_MAIN
+FROM alpine:3.16 AS build
 
-FROM spolab/toolbox:latest AS build
+ARG FILE_SRC
 
-COPY --chown=builder:builder . ./
-RUN go build -o bin/actor owner/cmd/actor.go
+RUN mkdir -p /build && \
+    apk add --no-cache go
+WORKDIR /build
+COPY . ./
+RUN go build -o bin/app ${FILE_SRC}
 
 FROM alpine:3.16
 
 RUN adduser -D runner
 RUN apk add --no-cache gcompat
-COPY --from=build /build/bin/actor /usr/local/bin
+COPY --from=build --chown=runner:runner /build/bin/app /usr/local/bin
 USER runner 
-ENTRYPOINT ["actor"]
+ENTRYPOINT ["/usr/local/bin/app"]

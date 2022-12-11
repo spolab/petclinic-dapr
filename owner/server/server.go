@@ -25,7 +25,6 @@ type OwnerActor struct {
 func OwnerActorFactory(logger *zap.Logger, dapr client.Client, broker string, topic string) actor.Factory {
 	return func() actor.Server {
 		logger.Info("initializing actor server", zap.Any("client", dapr), zap.String("broker", broker), zap.String("topic", topic))
-		// TODO should I be injecting the validator too?
 		return &OwnerActor{logger: logger, dapr: dapr, validate: validator.New(), broker: broker, topic: topic}
 	}
 }
