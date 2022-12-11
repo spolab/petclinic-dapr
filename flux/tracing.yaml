@@ -4,7 +4,6 @@ metadata:
   name: tracing
 spec:
   tracing:
-
     samplingRate: "1"
     zipkin:
-      endpointAddress: "https://tempo.tempo:9411/api/v2/spans"
+      endpointAddress: "http://tempo.tempo:9411/api/v2/spans"
