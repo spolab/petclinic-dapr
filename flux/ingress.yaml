@@ -1,22 +1,44 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: remove-prefixes
+spec:
+  stripPrefix:
+    prefixes:
+      - /owner
+---      
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: petclinic
+  labels:
+    labels:
+      traefik.http.middlewares.test-stripprefix.stripprefix.prefixes: /owner,/owner/api
 spec:
   entryPoints:
     - web
     - websecure
   routes:
+    # ----------------------------------------------------------------------------------------------------
+    # Routes 
+    # ----------------------------------------------------------------------------------------------------
     - kind: Rule
       match: Host(`petclinic.127.0.0.1.nip.io`) && PathPrefix(`/owner/api`)
       priority: 20
+      middlewares:
+        - name: remove-prefixes
       services:
         - name: petclinic-owner-api-dapr
           port: dapr-http
+    # ----------------------------------------------------------------------------------------------------
     # Catch-all rule that routes any unknown subpath to the UI. This has to be the lowest priority of all.
+    # ----------------------------------------------------------------------------------------------------
     - kind: Rule
       match: Host(`petclinic.127.0.0.1.nip.io`) && PathPrefix(`/owner`)
       priority: 10
+      middlewares:
+        - name: remove-prefixes
       services:
         - name: petclinic-owner-ui
           port: http          
