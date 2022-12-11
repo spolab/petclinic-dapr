@@ -1,4 +1,13 @@
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-api-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: petclinic
@@ -11,10 +20,10 @@ spec:
     - websecure
   routes:
     # ----------------------------------------------------------------------------------------------------
-    # Routes 
+    # Routes everything starting with /v1.0 to the DAPR sidecar
     # ----------------------------------------------------------------------------------------------------
     - kind: Rule
-      match: Host(`owner.petclinic.127.0.0.1.nip.io`) && PathPrefix(`v1.0`)
+      match: Host(`owner.petclinic.127.0.0.1.nip.io`) && PathPrefix(`/v1.0`)
       priority: 20
       services:
         - name: petclinic-owner-api-dapr
