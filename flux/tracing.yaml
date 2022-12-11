@@ -6,6 +6,6 @@ spec:
   tracing:
     samplingRate: "1"
     otel:
-      endpointAddress: "http://tempo.tempo:4317"
+      endpointAddress: "tempo.tempo:4317"
       protocol: grpc 
       isSecure: false
