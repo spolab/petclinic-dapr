@@ -28,24 +28,24 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: petclinic-owner-actor
+  name: owner-actor
 spec:
   selector:
     matchLabels:
-      app: petclinic-owner-actor
+      app: owner-actor
   template:
     metadata:
       labels:
-        app: petclinic-owner-actor
+        app: owner-actor
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/app-id: petclinic-owner-actor
+        dapr.io/app-id: owner-actor
         dapr.io/app-port: "3000"
         dapr.io/enable-metrics: "true"
         dapr.io/config: "tracing"
     spec:
       containers:
-      - name: petclinic-owner-actor
+      - name: owner-actor
         image: spolab/petclinic-owner-actor:latest
         imagePullPolicy: Never
         resources:
@@ -65,25 +65,25 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: petclinic-owner-api
+  name: owner-api
 spec:
   selector:
     matchLabels:
-      app: petclinic-owner-api
+      app: owner-api
   template:
     metadata:
       labels:
-        app: petclinic-owner-api
+        app: owner-api
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/app-id: petclinic-owner-api
+        dapr.io/app-id: owner-api
         dapr.io/app-port: "3000"
         dapr.io/enable-metrics: "true"
         dapr.io/sidecar-listen-addresses: 0.0.0.0,[::]
         dapr.io/config: "tracing"
     spec:
       containers:
-      - name: petclinic-owner-api
+      - name: owner-api
         image: spolab/petclinic-owner-api:latest
         imagePullPolicy: Never
         resources:
@@ -96,18 +96,18 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: petclinic-owner-ui
+  name: owner-ui
 spec:
   selector:
     matchLabels:
-      app: petclinic-owner-ui
+      app: owner-ui
   template:
     metadata:
       labels:
-        app: petclinic-owner-ui
+        app: owner-ui
     spec:
       containers:
-      - name: petclinic-owner-ui
+      - name: owner-ui
         image: spolab/petclinic-owner-ui
         imagePullPolicy: Never
         resources:
@@ -121,10 +121,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: petclinic-owner-ui
+  name: owner-ui
 spec:
   selector:
-    app: petclinic-owner-ui
+    app: owner-ui
   ports:
   - port: 80
     targetPort: http

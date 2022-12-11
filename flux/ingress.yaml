@@ -1,19 +1,7 @@
 apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: strip-api-prefix
-spec:
-  stripPrefix:
-    prefixes:
-      - /api
----
-apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: petclinic
-  labels:
-    labels:
-      traefik.http.middlewares.test-stripprefix.stripprefix.prefixes: /owner,/owner/api
 spec:
   entryPoints:
     - web
