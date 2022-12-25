@@ -6,7 +6,7 @@ import (
 
 	"github.com/dapr/go-sdk/client"
 	daprd "github.com/dapr/go-sdk/service/http"
-	"github.com/spolab/petclinic/owner/server"
+	"github.com/spolab/petstore/pkg/server"
 	"go.uber.org/zap"
 )
 

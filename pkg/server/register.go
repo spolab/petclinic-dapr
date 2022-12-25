@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/spolab/petclinic/owner/command"
-	"github.com/spolab/petclinic/owner/event"
+	"github.com/spolab/petstore/pkg/command"
+	"github.com/spolab/petstore/pkg/event"
 	"go.uber.org/zap"
 )
 

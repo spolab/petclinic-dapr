@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package com.toremo.petclinic.owner.api.event;
+package com.toremo.petstore.owner.api.event;
 
-option go_package = "github.com/spolab/petclinic/owner/pkg/api/event";
+option go_package = "github.com/spolab/petstore/owner/pkg/api/event";
 
 import "schema/model.proto";
 

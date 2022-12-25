@@ -7,7 +7,7 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear", 
-    "package": "nerdctl build --namespace k8s.io -t spolab/petclinic-owner-ui:latest ."
+    "package": "nerdctl build --namespace k8s.io -t spolab/petstore-owner-ui:latest ."
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",

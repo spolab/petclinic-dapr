@@ -11,22 +11,22 @@ import (
 
 type Owner mg.Namespace
 
-// build the owner image (spolab/petclinic-owner-actor)
+// build the owner image (spolab/petstore-owner-actor)
 func (Owner) Actor(ctx context.Context) error {
-	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/actor/actor.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petclinic-owner-actor:latest", ".")
+	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/actor/actor.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petstore-owner-actor:latest", ".")
 }
 
-// build the owner image (spolab/petclinic-owner-ui)
+// build the owner image (spolab/petstore-owner-ui)
 func (Owner) Api(ctx context.Context) error {
-	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/api/api.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petclinic-owner-api:latest", ".")
+	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "--build-arg", "FILE_SRC=owner/cli/api/api.go", "-f", "owner/docker/Dockerfile", "-t", "spolab/petstore-owner-api:latest", ".")
 }
 
-// build the owner image (spolab/petclinic-owner-ui)
+// build the owner image (spolab/petstore-owner-ui)
 func (Owner) Ui(ctx context.Context) error {
 	if err := sh.Run("npm", "--prefix", "owner/ui", "run", "build"); err != nil {
 		return err
 	}
-	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "-f", "owner/ui/Dockerfile", "-t", "spolab/petclinic-owner-ui:latest", "owner/ui")
+	return sh.Run("nerdctl", "build", "--namespace", "k8s.io", "-f", "owner/ui/Dockerfile", "-t", "spolab/petstore-owner-ui:latest", "owner/ui")
 }
 
 // build all the owner services

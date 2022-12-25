@@ -10,7 +10,7 @@ spec:
   - name: redisHost
     value: redis-headless.redis:6379
   - name: consumerID
-    value: petclinic-owner
+    value: petstore-owner
 ---
 apiVersion: dapr.io/v1alpha1
 kind: Component
@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: owner-actor
-        image: spolab/petclinic-owner-actor:latest
+        image: spolab/petstore-owner-actor:latest
         imagePullPolicy: Never
         resources:
           limits:
@@ -84,7 +84,7 @@ spec:
     spec:
       containers:
       - name: owner-api
-        image: spolab/petclinic-owner-api:latest
+        image: spolab/petstore-owner-api:latest
         imagePullPolicy: Never
         resources:
           limits:
@@ -108,7 +108,7 @@ spec:
     spec:
       containers:
       - name: owner-ui
-        image: spolab/petclinic-owner-ui
+        image: spolab/petstore-owner-ui
         imagePullPolicy: Never
         resources:
           limits:

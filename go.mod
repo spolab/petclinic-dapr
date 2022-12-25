@@ -1,16 +1,20 @@
-module github.com/spolab/petclinic
+module github.com/spolab/petstore
 
 go 1.19
 
 require (
 	github.com/dapr/go-sdk v1.6.0
 	github.com/go-playground/validator/v10 v10.11.1
+	github.com/golang/mock v1.6.0
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/magefile/mage v1.14.0
+	github.com/rs/zerolog v1.28.0
+	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.23.0
 )
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -20,7 +24,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/stretchr/testify v1.8.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
