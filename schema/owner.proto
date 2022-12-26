@@ -4,11 +4,11 @@ package api;
 
 enum CommandResult {
     // command executed successfully
-    ok = 0;
+    OK = 0;
     // command is invalid and has not been executed
-    invalid = 1;
+    INVALID = 1;
     // command is valid but an error happened during its execution
-    error = 2;
+    ERROR = 2;
 }
 
 enum Salutation {
