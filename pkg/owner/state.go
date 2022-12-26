@@ -1,4 +1,4 @@
-package server
+package owner
 
 type OwnerState struct {
 	Salutation string `json:"salutation"`

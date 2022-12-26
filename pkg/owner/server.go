@@ -1,10 +1,10 @@
-package server
+package owner
 
 import (
 	"github.com/dapr/go-sdk/actor"
 	"github.com/dapr/go-sdk/client"
 	"github.com/go-playground/validator/v10"
-	"go.uber.org/zap"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -14,7 +14,6 @@ const (
 
 type OwnerActor struct {
 	actor.ServerImplBase
-	logger   *zap.Logger
 	dapr     client.Client
 	validate *validator.Validate
 	broker   string
@@ -22,10 +21,10 @@ type OwnerActor struct {
 }
 
 // OwnerActorFactory is a
-func OwnerActorFactory(logger *zap.Logger, dapr client.Client, broker string, topic string) actor.Factory {
+func OwnerActorFactory(dapr client.Client, broker string, topic string) actor.Factory {
 	return func() actor.Server {
-		logger.Info("initializing actor server", zap.Any("client", dapr), zap.String("broker", broker), zap.String("topic", topic))
-		return &OwnerActor{logger: logger, dapr: dapr, validate: validator.New(), broker: broker, topic: topic}
+		log.Info().Interface("client", dapr).Str("broker", broker).Str("topic", topic).Msg("initializing actor server")
+		return &OwnerActor{dapr: dapr, validate: validator.New(), broker: broker, topic: topic}
 	}
 }
 
