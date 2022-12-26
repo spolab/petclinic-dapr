@@ -7,20 +7,19 @@
 #  - FILE_SRC: the name of the source file
 # ==================================================================================================================================
 
-FROM alpine:3.16 AS build
+FROM toremo/golang-build:latest AS build
 
 ARG FILE_SRC
+ARG FILE_DST
 
-RUN mkdir -p /build && \
-    apk add --no-cache go
-WORKDIR /build
 COPY . ./
-RUN go build -o bin/app ${FILE_SRC}
+RUN go build -o ${FILE_DST} ${FILE_SRC}
 
-FROM alpine:3.16
+FROM alpine:latest
 
 RUN adduser -D runner
 RUN apk add --no-cache gcompat
 COPY --from=build --chown=runner:runner /build/bin/app /usr/local/bin
 USER runner 
-ENTRYPOINT ["/usr/local/bin/app"]
+
+ENTRYPOINT [ "${FILE_DST}" ]
