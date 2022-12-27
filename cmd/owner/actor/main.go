@@ -24,7 +24,7 @@ func main() {
 	//
 	dapr, err := client.NewClient()
 	if err != nil {
-		log.Error().Err(err).Msg("Error initializing the Dapr client")
+		log.Fatal().Err(err).Msg("Error initializing the Dapr client")
 	}
 	defer dapr.Close()
 	//

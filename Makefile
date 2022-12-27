@@ -6,7 +6,7 @@ COVERAGE_OUT = .coverage.out
 all: bin/owner/actor 
 
 bin/owner/actor: gen/api/owner.pb.go $(COVERAGE_OUT) cmd/owner/actor/main.go pkg/owner/server.go
-	go build -o $@ $<
+	go build -o $@ cmd/owner/actor/main.go
 
 gen/api/%.pb.go: schema/%.proto
 	protoc --proto_path=schema --go_out=. --go_opt=M$(notdir $<)=gen/api $<
