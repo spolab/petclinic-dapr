@@ -1,7 +1,7 @@
 name: Build the DAPR Pet Clinic
 
 env:
-  OWNER_ACTOR_IMAGE: ghcr.io/spolab/petclinic-owner-actor:v0.0.1
+  OWNER_ACTOR_IMAGE: ghcr.io/spolab/petclinic-owner-actor:v0.0.2
 
 on:
   push:
