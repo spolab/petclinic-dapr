@@ -24,6 +24,6 @@ jobs:
       with:
         registry: ghcr.io
         username: spolab
-        password: ${{ secrets.PAT }}
+        password: ${{ secrets.GHCR_PAT }}
     - name: Push the Docker image
       run: docker push $OWNER_ACTOR_IMAGE
