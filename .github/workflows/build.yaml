@@ -9,7 +9,7 @@ on:
 jobs:
   owner-actor:
     runs-on: ubuntu-latest
-    container: ghcr.io/spolab/golang-build:latest
+    container: ghcr.io/spolab/golang-builder:latest
     steps:
       - name: Build all
         run: make all
