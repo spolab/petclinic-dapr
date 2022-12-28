@@ -2,11 +2,14 @@ package main
 
 import (
 	_ "embed"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/dapr/go-sdk/client"
-	"github.com/dapr/go-sdk/service/http"
+	"github.com/go-chi/chi"
 	"github.com/rs/zerolog/log"
+	"github.com/spolab/petstore/pkg/vet"
 )
 
 var revision string
@@ -21,16 +24,23 @@ func main() {
 	//
 	// Connect to the DAPR sidecar
 	//
-	_, err := client.NewClient()
+	dapr, err := client.NewClient()
 	if err != nil {
 		log.Fatal().Err(err).Msg("connecting to the dapr sidecar")
 	}
 	//
 	// Initialize the router
 	//
-	app := http.NewService("127.0.0.1:3000")
+	router := chi.NewRouter()
+	router.Put("/{id}", vet.Register(dapr))
 	//
 	// Start the server
 	//
-	log.Fatal().Err(app.Start()).Msg("starting the http service")
+	app := http.Server{
+		Addr:         "127.0.0.1:3000",
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	log.Fatal().Err(app.ListenAndServe()).Msg("starting the http service")
 }

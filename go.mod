@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/cloudevents/sdk-go/v2 v2.12.0
 	github.com/dapr/go-sdk v1.6.0
+	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-chi/render v1.0.2
 	github.com/go-playground/validator/v10 v10.11.1
