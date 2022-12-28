@@ -27,4 +27,4 @@ jobs:
         username: spolab
         password: ${{ secrets.GHCR_PAT }}
     - name: Push the Docker image
-      run: docker push $OWNER_ACTOR_IMAGE
+      run: docker push $VET_ACTOR_IMAGE
