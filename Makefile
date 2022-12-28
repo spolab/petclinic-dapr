@@ -4,10 +4,10 @@ DIR_BIN = bin
 COVERAGE_OUT = .coverage.out
 VET_API_MAIN = cmd/vet/api/main.go
 VET_API_OUT = $(DIR_BIN)/vet/api
-VET_API_DEPS = $(VET_API_MAIN) pkg/vet/api.go pkg/vet/command.go
+VET_API_DEPS = $(VET_API_MAIN) pkg/vet/api.go pkg/vet/command.go pkg/vet/events.go
 VET_ACTOR_MAIN = cmd/vet/actor/main.go
 VET_ACTOR_OUT = $(DIR_BIN)/vet/actor
-VET_ACTOR_DEPS = $(VET_ACTOR_MAIN) pkg/vet/actor.go pkg/vet/command.go
+VET_ACTOR_DEPS = $(VET_ACTOR_MAIN) pkg/vet/actor.go pkg/vet/command.go pkg/vet/events.go
 
 
 all: $(COVERAGE_OUT) $(VET_API_OUT) $(VET_ACTOR_OUT) 
