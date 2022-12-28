@@ -15,8 +15,8 @@ import (
 var revision string
 
 func main() {
-	pubsub := os.Getenv("PUBSUB_NAME")
-	topic := os.Getenv("PUBSUB_TOPIC")
+	pubsub := os.Getenv("BROKER")
+	topic := os.Getenv("TOPIC")
 	//
 	// Announces the bootstrap of the microservice
 	//

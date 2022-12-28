@@ -9,4 +9,4 @@ LABEL org.opencontainers.image.licenses=MIT
 
 COPY ${APP} ./app
 
-ENTRYPOINT [ "./actor" ]
+ENTRYPOINT [ "./app" ]
