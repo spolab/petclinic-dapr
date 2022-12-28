@@ -21,39 +21,21 @@ jobs:
         registry: ghcr.io
         username: spolab
         password: ${{ secrets.GHCR_PAT }}
-
-  testing:
-    needs: login-ghcr
-    runs-on: ubuntu-latest
-    container: ghcr.io/spolab/golang-builder:v0.0.1
-    steps:
     - name: Checkout code
       uses: actions/checkout@v3
     - name: Perform code vetting
       run: go vet ./...
     - name: Perform code testing
       run: go test ./...
-  
-  vet-actor:
-    needs: testing
-    runs-on: ubuntu-latest
-    container: ghcr.io/spolab/golang-builder:v0.0.1
-    steps:
-    - name: Compile
+    - name: Compile Vet Actor
       run: go build -o bin/vet/actor cmd/vet/actor/main.go
-    - name: Build image
+    - name: Build Vet Actor image
       run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/actor --build-arg DESC="dapr petstore vet actor" --tag $VET_ACTOR_IMAGE .
-    - name: Push image
+    - name: Push Vet Actor image
       run: docker push $VET_ACTOR_IMAGE
-
-  vet-api:
-    needs: testing
-    runs-on: ubuntu-latest
-    container: ghcr.io/spolab/golang-builder:v0.0.1
-    steps:
-    - name: Compile
+    - name: Compile Vet API
       run: go build -o bin/vet/api cmd/vet/api/main.go
-    - name: Build image
+    - name: Build Vet API image
       run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/api --build-arg DESC="dapr petstore vet api" --tag $VET_API_IMAGE .
-    - name: Push image
+    - name: Push Vet API image
       run: docker push $VET_API_IMAGE
