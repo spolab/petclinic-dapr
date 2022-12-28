@@ -30,7 +30,7 @@ type Actor struct {
 	topic    string
 }
 
-func (Actor) Type() string {
+func (*Actor) Type() string {
 	return "vet"
 }
 
