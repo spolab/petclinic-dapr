@@ -1,7 +1,8 @@
 name: Build the DAPR Pet Clinic
 
 env:
-  OWNER_ACTOR_IMAGE: ghcr.io/spolab/petclinic-owner-actor:v0.0.2
+  VET_ACTOR_IMAGE: ghcr.io/spolab/petclinic-vet-actor:v0.0.1
+  VET_API_IMAGE: ghcr.io/spolab/petclinic-vet-api:v0.0.1
 
 on:
   push:
@@ -10,7 +11,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  owner-actor:
+  vet-actor:
     runs-on: ubuntu-latest
     container: ghcr.io/spolab/golang-builder:v0.0.1
     steps:
@@ -18,7 +19,7 @@ jobs:
     - name: Build all
       run: make all
     - name: Build the Owner Actor image
-      run: docker build --file docker/actor.Dockerfile --build-arg NAME=owner --tag $OWNER_ACTOR_IMAGE .
+      run: docker build --file docker/actor.Dockerfile --build-arg NAME=vet --tag $VET_ACTOR_IMAGE .
     - name: Login to GHCR repository
       uses: docker/login-action@v2.1.0
       with:

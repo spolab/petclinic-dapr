@@ -14,6 +14,6 @@ func main() {
 		log.Fatal().Err(err).Msg("connecting to the dapr sidecar")
 	}
 	app := http.NewService("127.0.0.1:3000")
-	app.RegisterActorImplFactory(vet.ActorFactory(client, validator.New()))
+	app.RegisterActorImplFactory(vet.ActorFactory(client, validator.New(), "petclinic-pubsub", "vet"))
 	log.Fatal().Err(app.Start()).Msg("starting the actor server")
 }

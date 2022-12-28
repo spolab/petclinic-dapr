@@ -1,12 +1,12 @@
-# .PHONY: clean all toolbox
+.PHONY: clean all
 
-TOOLBOX_IMAGE = toremo/golang-build:latest
+DIR_BIN = bin
 COVERAGE_OUT = .coverage.out
 VET_API_MAIN = cmd/vet/api/main.go
-VET_API_OUT = bin/vet/api
+VET_API_OUT = $(DIR_BIN)/vet/api
 VET_API_DEPS = $(VET_API_MAIN) pkg/vet/api.go pkg/vet/command.go
 VET_ACTOR_MAIN = cmd/vet/actor/main.go
-VET_ACTOR_OUT = bin/vet/actor
+VET_ACTOR_OUT = $(DIR_BIN)/vet/actor
 VET_ACTOR_DEPS = $(VET_ACTOR_MAIN) pkg/vet/actor.go pkg/vet/command.go
 
 
@@ -25,7 +25,7 @@ $(COVERAGE_OUT): $(wildcard gen/**/*) $(wildcard cmd/**/*) $(wildcard pkg/**/*)
 	go test -coverprofile $@ ./...
 
 clean:
-	rm -Rf gen bin $(COVERAGE_OUT)
+	rm -Rf gen $(DIR_BIN) $(COVERAGE_OUT)
 
 # dot not forget - you can also combine notdir and basename: protoc --proto_path=schema --go_out=. --go_opt=M$(notdir $<)=gen/api/$(notdir $(basename $<)) $<
 # note on the use of $< - it always returns the first dependency for which there is matching rule!
