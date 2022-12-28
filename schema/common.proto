@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+enum Status {
+    OK = 0;
+    ERROR = 1;
+    WARNING = 2;
+}
