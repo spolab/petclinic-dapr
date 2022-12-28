@@ -19,7 +19,7 @@ jobs:
     - name: Build all
       run: make all
     - name: Build the Owner Actor image
-      run: docker build --file docker/actor.Dockerfile --build-arg NAME=vet --tag $VET_ACTOR_IMAGE .
+      run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/actor --build-arg DESC="dapr petstore vet actor" --tag $VET_ACTOR_IMAGE .
     - name: Login to GHCR repository
       uses: docker/login-action@v2.1.0
       with:
@@ -28,3 +28,21 @@ jobs:
         password: ${{ secrets.GHCR_PAT }}
     - name: Push the Docker image
       run: docker push $VET_ACTOR_IMAGE
+
+  vet-api:
+    runs-on: ubuntu-latest
+    container: ghcr.io/spolab/golang-builder:v0.0.1
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build all
+      run: make all
+    - name: Build the Owner Actor image
+      run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/api --build-arg DESC="dapr petstore vet api" --tag $VET_API_IMAGE .
+    - name: Login to GHCR repository
+      uses: docker/login-action@v2.1.0
+      with:
+        registry: ghcr.io
+        username: spolab
+        password: ${{ secrets.GHCR_PAT }}
+    - name: Push the Docker image
+      run: docker push $VET_API_IMAGE
