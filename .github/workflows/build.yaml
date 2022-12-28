@@ -11,7 +11,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  login-ghcr:
+  build:
     runs-on: ubuntu-latest
     container: ghcr.io/spolab/golang-builder:v0.0.1
     steps:
