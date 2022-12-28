@@ -17,14 +17,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: Perform vet
+    - name: Perform code vetting
       run: go vet ./...
-    - name: Test code
+    - name: Perform code testing
       run: go test ./...
     - name: Build the Vet actor image
       run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/actor --build-arg DESC="dapr petstore vet actor" --tag $VET_ACTOR_IMAGE .
     - name: Build the Vet API image
-      run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/actor --build-arg DESC="dapr petstore api actor" --tag $VET_API_IMAGE .
+      run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/api --build-arg DESC="dapr petstore api actor" --tag $VET_API_IMAGE .
     - name: Login to GHCR repository
       uses: docker/login-action@v2.1.0
       with:
