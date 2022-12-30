@@ -56,7 +56,7 @@ func ActorFactory(dapr client.Client, validator *validator.Validate, broker stri
 	}
 }
 
-func (actor *Actor) Register(ctx context.Context, cmd *RegisterVetCommand) error {
+func (actor *Actor) Register(ctx context.Context, cmd *RegisterVetCommand) (*RegisterVetResponse, error) {
 	log.Info().Str("id", actor.ID()).Msg("begin register")
 	//
 	// Return an error if the command does not pass validation
@@ -64,7 +64,7 @@ func (actor *Actor) Register(ctx context.Context, cmd *RegisterVetCommand) error
 	log.Debug().Str("id", actor.ID()).Msg("validate command")
 	if err := actor.validate.Struct(cmd); err != nil {
 		log.Error().Str("id", actor.ID()).Err(err).Msg("validating command")
-		return err
+		return nil, err
 	}
 	//
 	// Return an error if the actor instance already exists
@@ -73,11 +73,11 @@ func (actor *Actor) Register(ctx context.Context, cmd *RegisterVetCommand) error
 	found, err := actor.GetStateManager().Contains(keyDetails)
 	if err != nil {
 		log.Error().Str("id", actor.ID()).Err(err).Msg("executing statemanager::contains")
-		return err
+		return nil, err
 	}
 	if found {
 		log.Error().Str("id", actor.ID()).Msg("vet already exists")
-		return fmt.Errorf("vet '%s' already exists", actor.ID())
+		return nil, fmt.Errorf("vet '%s' already exists", actor.ID())
 	}
 	//
 	// Stores the state of the aggregate
@@ -86,7 +86,7 @@ func (actor *Actor) Register(ctx context.Context, cmd *RegisterVetCommand) error
 	details := &ActorDetails{Id: actor.ID(), Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email, Active: true}
 	if err := actor.GetStateManager().Set(keyDetails, details); err != nil {
 		log.Error().Str("id", actor.ID()).Err(err).Msg("snapshotting aggregate state")
-		return err
+		return nil, err
 	}
 	//
 	// Now that we know that the state is safely stored, let´s broadcast the event
@@ -96,8 +96,8 @@ func (actor *Actor) Register(ctx context.Context, cmd *RegisterVetCommand) error
 	event := events.CloudEvent("vet", "VetRegistered", &VetRegistered{Id: actor.ID(), Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email})
 	if err := actor.dapr.PublishEvent(ctx, actor.broker, actor.topic, event); err != nil {
 		log.Error().Str("id", actor.ID()).Err(err).Msg("publishing event")
-		return err
+		return nil, err
 	}
 	log.Info().Str("id", actor.ID()).Msg("end register")
-	return nil
+	return &RegisterVetResponse{Status: 0, Message: "OK"}, nil
 }
