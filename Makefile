@@ -1,4 +1,4 @@
-.PHONY: clean all
+.PHONY: clean all actor
 
 DIR_BIN = bin
 COVERAGE_OUT = .coverage.out
@@ -7,22 +7,18 @@ VET_API_OUT = $(DIR_BIN)/vet/api
 VET_API_DEPS = $(VET_API_MAIN) pkg/vet/api.go pkg/vet/command.go pkg/vet/events.go
 VET_ACTOR_MAIN = cmd/vet/actor/main.go
 VET_ACTOR_OUT = $(DIR_BIN)/vet/actor
-VET_ACTOR_DEPS = $(VET_ACTOR_MAIN) pkg/vet/actor.go pkg/vet/command.go pkg/vet/events.go
+ACTOR_DEPS = cmd/actor/main.go $(wildcard pkg/actor/**/*)
 
+actor: bin/actor 
 
-all: $(COVERAGE_OUT) $(VET_API_OUT) $(VET_ACTOR_OUT) 
-
-$(VET_ACTOR_OUT): $(VET_ACTOR_DEPS)
-	go build -o $@ $(VET_ACTOR_MAIN)
-
-$(VET_API_OUT): $(VET_API_DEPS)
-	go build -o $@ $(VET_API_MAIN)
+bin/%: cmd/%/main.go
+	go build -o $@ $<
 
 gen/api/%.pb.go: schema/%.proto
 	protoc --proto_path=schema --go_out=. --go_opt=M$(notdir $<)=gen/api --go_opt=Mcommon.proto=gen/api $<
 
-$(COVERAGE_OUT): $(wildcard gen/**/*) $(wildcard cmd/**/*) $(wildcard pkg/**/*)
-	go test -coverprofile $@ ./...
+test:
+	go test cmd/actor pkg/actor pkg/common
 
 clean:
 	rm -Rf gen $(DIR_BIN) $(COVERAGE_OUT)

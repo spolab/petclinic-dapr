@@ -11,15 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # 
-name: Build the DAPR Pet Clinic
+name: Actor Server Pipeline
 
 env:
-  VET_ACTOR_IMAGE: ghcr.io/spolab/petclinic-vet-actor:latest
-  VET_API_IMAGE: ghcr.io/spolab/petclinic-vet-api:latest
+  IMAGE_NAME: ghcr.io/spolab/petclinic-actor:latest
 
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - "cmd/actor"
+      - "pkg/actor"
+      - "pkg/common"
   pull_request:
     branches: [ "main" ]
 
@@ -36,19 +39,20 @@ jobs:
         password: ${{ secrets.GHCR_PAT }}
     - name: Checkout code
       uses: actions/checkout@v3
+    - name: Download dependencies
+      run: go mod verify
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: /usr/local/share/go
+        key: golang-deps
     - name: Perform code vetting
       run: go vet ./...
     - name: Perform code testing
       run: go test ./...
-    - name: Compile Vet Actor
-      run: go build -o bin/vet/actor cmd/vet/actor/main.go
-    - name: Build Vet Actor image
-      run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/actor --build-arg DESC="dapr petstore vet actor" --tag $VET_ACTOR_IMAGE .
-    - name: Push Vet Actor image
-      run: docker push $VET_ACTOR_IMAGE
-    - name: Compile Vet API
-      run: go build -o bin/vet/api cmd/vet/api/main.go
-    - name: Build Vet API image
-      run: docker build --file docker/Dockerfile --build-arg APP=bin/vet/api --build-arg DESC="dapr petstore vet api" --tag $VET_API_IMAGE .
-    - name: Push Vet API image
-      run: docker push $VET_API_IMAGE
+    - name: Compile actor server
+      run: go build -o bin/actor cmd/actor/main.go
+    - name: Build actor server image
+      run: docker build --file docker/Dockerfile --build-arg APP=bin/actor --build-arg DESC="dapr petstore actor server" --tag $IMAGE_NAME .
+    - name: Push actor server image
+      run: docker push $IMAGE_NAME
