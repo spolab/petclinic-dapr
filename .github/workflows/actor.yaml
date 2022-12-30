@@ -20,8 +20,10 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - "cmd/actor/**.go"
-      - "pkg/actor/**.go"
+      - "cmd/actor/*.go"
+      - "pkg/model/*.go"
+      - "pkg/command/*.go"
+      - "pkg/event/*.go"
   pull_request:
     branches: [ "main" ]
 
