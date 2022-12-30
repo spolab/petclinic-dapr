@@ -52,7 +52,7 @@ func (*Actor) Type() string {
 func ActorFactory(dapr client.Client, validator *validator.Validate, broker string, topic string) actor.Factory {
 	return func() actor.Server {
 		log.Info().Msg("activating actor")
-		return &Actor{dapr: dapr, validate: validator}
+		return &Actor{dapr: dapr, validate: validator, broker: broker, topic: topic}
 	}
 }
 
@@ -92,7 +92,7 @@ func (actor *Actor) Register(ctx context.Context, cmd *RegisterVetCommand) (*Reg
 	// Now that we know that the state is safely stored, let´s broadcast the event
 	// NOTE: I know this is not fail-safe. This code is just for illustrative purposes. Will be improved later.
 	//
-	log.Debug().Str("id", actor.ID()).Msg("publish event")
+	log.Debug().Str("id", actor.ID()).Str("broker", actor.broker).Str("topic", actor.topic).Msg("publish event")
 	event := events.CloudEvent("vet", "VetRegistered", &VetRegistered{Id: actor.ID(), Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email})
 	if err := actor.dapr.PublishEvent(ctx, actor.broker, actor.topic, event); err != nil {
 		log.Error().Str("id", actor.ID()).Err(err).Msg("publishing event")

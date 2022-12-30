@@ -31,7 +31,7 @@ func main() {
 	//
 	broker := os.Getenv("BROKER")
 	topic := os.Getenv("TOPIC")
-	log.Info().Str("pubsub", broker).Str("topic", topic).Msg("starting owner microservice")
+	log.Info().Str("pubsub", broker).Str("topic", topic).Msg("starting vet microservice")
 	//
 	// Connect to the DAPR sidecar
 	//
