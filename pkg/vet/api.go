@@ -16,10 +16,11 @@ func Register(dapr client.Client) http.HandlerFunc {
 		id := chi.URLParam(r, "id")
 		var res RegisterVetResponse
 		ctx := r.Context()
-		log.Debug().Str("id", id).Msg("START register")
+		log.Debug().Str("id", id).Msg("begin register")
 		//
-		// Invoke the actor
+		// Parse the request
 		//
+		log.Debug().Str("id", id).Msg("reading request payload")
 		bytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			render.Status(r, http.StatusBadRequest)
@@ -27,6 +28,7 @@ func Register(dapr client.Client) http.HandlerFunc {
 			log.Error().Str("id", id).Err(err).Msg("reading request body")
 			return
 		}
+		log.Debug().Str("id", id).Str("command", string(bytes)).Msg("invoking actor")
 		raw, err := dapr.InvokeActor(ctx, &client.InvokeActorRequest{ActorType: "vet", ActorID: id, Method: "register", Data: bytes})
 		if err != nil {
 			render.Status(r, http.StatusInternalServerError)
@@ -37,6 +39,7 @@ func Register(dapr client.Client) http.HandlerFunc {
 		//
 		// Parse the response
 		//
+		log.Debug().Str("id", id).Msg("parsing the response")
 		err = json.Unmarshal(raw.Data, &res)
 		if err != nil {
 			render.Status(r, http.StatusInternalServerError)
