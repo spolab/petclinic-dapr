@@ -2,7 +2,7 @@ name: Build the DAPR Pet Clinic
 
 env:
   VET_ACTOR_IMAGE: ghcr.io/spolab/petclinic-vet-actor:v0.0.1
-  VET_API_IMAGE: ghcr.io/spolab/petclinic-vet-api:v0.0.2
+  VET_API_IMAGE: ghcr.io/spolab/petclinic-vet-api:v0.0.3
 
 on:
   push:
