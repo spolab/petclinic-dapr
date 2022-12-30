@@ -13,21 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package parse
+package command
 
-import (
-	"encoding/json"
-	"io"
-)
-
-func JsonFromReader(source io.Reader, target any) error {
-	bytes, err := io.ReadAll(source)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(bytes, target)
+type RegisterVetCommand struct {
+	Name    string `json:"name" validate:"required"`
+	Surname string `json:"surname" validate:"required"`
+	Phone   string `json:"phone" validate:"required"`
+	Email   string `json:"email" validate:"required,email"`
 }
 
-func JsonFromBytes(source []byte, target any) error {
-	return json.Unmarshal(source, target)
+type RegisterVetResponse struct {
+	Status  int    `json:"status"`
+	Message string `json:"message,omitempty"`
 }

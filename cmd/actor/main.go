@@ -22,7 +22,7 @@ import (
 	"github.com/dapr/go-sdk/service/http"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
-	"github.com/spolab/petstore/pkg/vet"
+	"github.com/spolab/petstore/pkg/model"
 )
 
 func main() {
@@ -43,6 +43,6 @@ func main() {
 	// Start the actor server
 	//
 	app := http.NewService("127.0.0.1:3000")
-	app.RegisterActorImplFactory(vet.ActorFactory(client, validator.New(), broker, topic))
+	app.RegisterActorImplFactory(model.VetActorFactory(client, validator.New(), broker, topic))
 	log.Fatal().Err(app.Start()).Msg("starting the actor server")
 }

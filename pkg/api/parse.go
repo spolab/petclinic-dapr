@@ -13,12 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package vet
+package api
 
-type VetRegistered struct {
-	Id      string `json:"id"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-	Phone   string `json:"phone"`
-	Email   string `json:"email"`
+import (
+	"encoding/json"
+	"io"
+)
+
+func JsonFromReader(source io.Reader, target any) error {
+	bytes, err := io.ReadAll(source)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, target)
+}
+
+func JsonFromBytes(source []byte, target any) error {
+	return json.Unmarshal(source, target)
 }

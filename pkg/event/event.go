@@ -13,16 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package vet
+package event
 
-type RegisterVetCommand struct {
-	Name    string `json:"name" validate:"required"`
-	Surname string `json:"surname" validate:"required"`
-	Phone   string `json:"phone" validate:"required"`
-	Email   string `json:"email" validate:"required,email"`
-}
-
-type RegisterVetResponse struct {
-	Status  int    `json:"status"`
-	Message string `json:"message,omitempty"`
+type VetRegistered struct {
+	Id      string `json:"id"`
+	Name    string `json:"name"`
+	Surname string `json:"surname"`
+	Phone   string `json:"phone"`
+	Email   string `json:"email"`
 }

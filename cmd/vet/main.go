@@ -24,7 +24,7 @@ import (
 	"github.com/dapr/go-sdk/client"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
-	"github.com/spolab/petstore/pkg/vet"
+	"github.com/spolab/petstore/pkg/api"
 )
 
 var revision string
@@ -47,7 +47,7 @@ func main() {
 	// Initialize the router
 	//
 	router := chi.NewRouter()
-	router.Put("/{id}", vet.Register(dapr))
+	router.Put("/{id}", api.Register(dapr))
 	//
 	// Start the server
 	//
