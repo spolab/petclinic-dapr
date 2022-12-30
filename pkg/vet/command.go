@@ -1,7 +1,6 @@
 package vet
 
 type RegisterVetCommand struct {
-	Id      string `json:"id" validate:"required"`
 	Name    string `json:"name" validate:"required"`
 	Surname string `json:"surname" validate:"required"`
 	Phone   string `json:"phone" validate:"required"`
