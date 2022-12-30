@@ -35,7 +35,7 @@ func Register(dapr client.Client) http.HandlerFunc {
 			respond.String(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		log.Debug().Str("id", id).Msg("executing actor method")
+		log.Debug().Str("id", id).Str("payload", string(bytes)).Msg("executing actor method")
 		raw, err := dapr.InvokeActor(ctx, &client.InvokeActorRequest{ActorType: "vet", ActorID: id, Method: "register", Data: bytes})
 		if err != nil {
 			respond.String(w, http.StatusInternalServerError, err.Error())
