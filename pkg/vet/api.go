@@ -2,54 +2,58 @@ package vet
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"github.com/dapr/go-sdk/client"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"github.com/rs/zerolog/log"
+	"github.com/spolab/petstore/pkg/common/parse"
+	"github.com/spolab/petstore/pkg/common/respond"
 )
 
 func Register(dapr client.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
-		var res RegisterVetResponse
 		ctx := r.Context()
+		var cmd RegisterVetCommand
 		log.Debug().Str("id", id).Msg("begin register")
 		//
 		// Parse the request
 		//
 		log.Debug().Str("id", id).Msg("reading request payload")
-		bytes, err := io.ReadAll(r.Body)
-		if err != nil {
-			render.Status(r, http.StatusBadRequest)
-			render.PlainText(w, r, err.Error())
+		if err := parse.JsonFromReader(r.Body, &cmd); err != nil {
+			respond.String(w, http.StatusBadRequest, err.Error())
 			log.Error().Str("id", id).Err(err).Msg("reading request body")
 			return
 		}
-		log.Debug().Str("id", id).Str("command", string(bytes)).Msg("invoking actor")
+		//
+		// Invoke the actor method
+		//
+		log.Debug().Str("id", id).Msgf("marshalling command %v", cmd)
+		bytes, err := json.Marshal(&cmd)
+		if err != nil {
+			respond.String(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		log.Debug().Str("id", id).Msg("executing actor method")
 		raw, err := dapr.InvokeActor(ctx, &client.InvokeActorRequest{ActorType: "vet", ActorID: id, Method: "register", Data: bytes})
 		if err != nil {
-			render.Status(r, http.StatusInternalServerError)
-			render.PlainText(w, r, err.Error())
-			log.Error().Str("id", id).Err(err).Msg("invoking actor")
+			respond.String(w, http.StatusInternalServerError, err.Error())
+			log.Error().Str("id", id).Err(err).Msg("invoking actor method")
 			return
 		}
 		//
 		// Parse the response
 		//
 		log.Debug().Str("id", id).Msg("parsing the response")
-		err = json.Unmarshal(raw.Data, &res)
+		var res RegisterVetResponse
+		err = parse.JsonFromBytes(raw.Data, &res)
 		if err != nil {
-			render.Status(r, http.StatusInternalServerError)
-			render.PlainText(w, r, err.Error())
+			respond.String(w, http.StatusInternalServerError, err.Error())
 			log.Error().Str("id", id).Err(err).Msg("parsing the response")
-
 			return
 		}
-		render.Status(r, http.StatusAccepted)
-		render.JSON(w, r, &res)
+		respond.JSON(w, http.StatusAccepted, &res)
 		log.Debug().Str("id", id).Msg("END register")
 	}
 }
