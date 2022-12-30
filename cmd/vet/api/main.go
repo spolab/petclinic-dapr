@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dapr/go-sdk/client"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/spolab/petstore/pkg/vet"
 )
