@@ -40,7 +40,7 @@ jobs:
     - name: Perform code testing
       run: go test ./...
     - name: Compile actor server
-      run: go build -o bin/actor cmd/actor/main.go
+      run: go build -o bin/actor-init cmd/actor-init/main.go
     - name: Build actor server image
       run: docker build --file docker/Dockerfile --build-arg APP=bin/actor-init --build-arg DESC="dapr petstore actor server init" --tag $IMAGE_NAME .
     - name: Login to GHCR repository
