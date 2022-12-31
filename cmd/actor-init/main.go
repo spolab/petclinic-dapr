@@ -25,6 +25,7 @@ import (
 )
 
 func main() {
+	log.Info().Msg("Actor server init container starting")
 	natsAddr := os.Getenv("NATS_ADDR")
 	nc, err := nats.Connect(natsAddr)
 	if err != nil {
@@ -38,4 +39,5 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("connecting to nats")
 	}
+	log.Info().Msg("Actor server init container complete")
 }
