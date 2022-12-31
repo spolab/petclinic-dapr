@@ -15,12 +15,13 @@ name: Actor Server Pipeline
 
 env:
   IMAGE_NAME: ghcr.io/spolab/petclinic-actor:latest
+  SRC: cmd/actor/main.go
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - "cmd/actor/*.go"
+      - $SRC
       - "pkg/model/*.go"
       - "pkg/command/*.go"
       - "pkg/event/*.go"
@@ -31,11 +32,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
-        go-version: '1.19.4'      
+        go-version: '1.19.4'     
+        cache: true 
     - name: Download dependencies
       run: go mod verify
     - name: Perform code vetting
@@ -43,7 +44,7 @@ jobs:
     - name: Perform code testing
       run: go test ./...
     - name: Compile actor server
-      run: go build -o bin/actor cmd/actor/main.go
+      run: go build -o bin/actor $SRC
     - name: Build actor server image
       run: docker build --file docker/Dockerfile --build-arg APP=bin/actor --build-arg DESC="dapr petstore actor server" --tag $IMAGE_NAME .
     - name: Login to GHCR repository

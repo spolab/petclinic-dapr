@@ -57,7 +57,7 @@ func VetActorFactory(dapr client.Client, validator *validator.Validate, broker s
 	}
 }
 
-func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (*command.RegisterVetResponse, error) {
+func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) *command.RegisterVetResponse {
 	log.Info().Str("id", vet.ID()).Msg("begin register")
 	//
 	// Return an error if the command does not pass validation
@@ -65,7 +65,7 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	log.Debug().Str("id", vet.ID()).Msg("validate command")
 	if err := vet.validate.Struct(cmd); err != nil {
 		log.Error().Str("id", vet.ID()).Err(err).Msg("validating command")
-		return nil, err
+		return &command.RegisterVetResponse{Status: command.StatusInvalid, Message: err.Error()}
 	}
 	//
 	// Return an error if the actor instance already exists
@@ -74,11 +74,11 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	found, err := vet.GetStateManager().Contains(keyDetails)
 	if err != nil {
 		log.Error().Str("id", vet.ID()).Err(err).Msg("executing statemanager::contains")
-		return nil, err
+		return &command.RegisterVetResponse{Status: command.StatusError, Message: err.Error()}
 	}
 	if found {
 		log.Error().Str("id", vet.ID()).Msg("vet already exists")
-		return nil, fmt.Errorf("vet '%s' already exists", vet.ID())
+		return &command.RegisterVetResponse{Status: command.StatusInvalid, Message: fmt.Sprintf("vet '%s' already exists", vet.ID())}
 	}
 	//
 	// Stores the state of the aggregate
@@ -87,7 +87,7 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	details := &VetDetails{Id: vet.ID(), Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email, Active: true}
 	if err := vet.GetStateManager().Set(keyDetails, details); err != nil {
 		log.Error().Str("id", vet.ID()).Err(err).Msg("snapshotting aggregate state")
-		return nil, err
+		return &command.RegisterVetResponse{Status: command.StatusError, Message: err.Error()}
 	}
 	//
 	// Now that we know that the state is safely stored, let´s broadcast the event
@@ -97,8 +97,8 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	event := event.CloudEvent("vet", "VetRegistered", &event.VetRegistered{Id: vet.ID(), Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email})
 	if err := vet.dapr.PublishEvent(ctx, vet.broker, vet.topic, event); err != nil {
 		log.Error().Str("id", vet.ID()).Err(err).Msg("publishing event")
-		return nil, err
+		return &command.RegisterVetResponse{Status: command.StatusError, Message: err.Error()}
 	}
 	log.Info().Str("id", vet.ID()).Msg("end register")
-	return &command.RegisterVetResponse{Status: 0, Message: "OK"}, nil
+	return &command.RegisterVetResponse{Status: command.StatusOK, Message: "OK"}
 }

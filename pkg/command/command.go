@@ -15,6 +15,12 @@ limitations under the License.
 */
 package command
 
+const (
+	StatusOK = iota
+	StatusInvalid
+	StatusError
+)
+
 type RegisterVetCommand struct {
 	Name    string `json:"name" validate:"required"`
 	Surname string `json:"surname" validate:"required"`

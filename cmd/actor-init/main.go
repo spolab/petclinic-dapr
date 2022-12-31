@@ -24,6 +24,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// actor-init is a simple init container that does the NATS configuration for the actors
+// without having to recur to the JetStream operator (which does not really make sense for this small deployment)
 func main() {
 	log.Info().Msg("Actor server init container starting")
 	natsAddr := os.Getenv("NATS_ADDR")
