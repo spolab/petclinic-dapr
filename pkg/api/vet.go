@@ -60,7 +60,7 @@ func Register(dapr client.Client) http.HandlerFunc {
 		// Parse the response
 		//
 		log.Debug().Str("id", id).Msg("parsing the response")
-		var res command.RegisterVetResponse
+		var res command.ActorResponse
 		err = JsonFromBytes(raw.Data, &res)
 		if err != nil {
 			String(w, http.StatusInternalServerError, err.Error())

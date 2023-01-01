@@ -19,86 +19,142 @@ import (
 	"context"
 	"fmt"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/dapr/go-sdk/actor"
-	"github.com/dapr/go-sdk/client"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 	"github.com/spolab/petstore/pkg/command"
 	"github.com/spolab/petstore/pkg/event"
 )
 
-const keyDetails = "details"
+const (
+	KeyState             = "state"
+	KeyEvents            = "events"
+	EventVetRegisteredV1 = "VetRegistered/v1"
+)
 
-type VetDetails struct {
+type VetState struct {
 	Id      string `json:"id"`
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
 	Phone   string `json:"phone"`
 	Email   string `json:"email"`
-	Active  bool   `json:"active"`
+	Deleted bool   `json:"deleted"`
+	Version int    `json:"version"`
 }
 
 type Vet struct {
 	actor.ServerImplBase
-	dapr     client.Client
+	state    *VetState
 	validate *validator.Validate
-	broker   string
-	topic    string
+	events   []*cloudevents.Event
 }
 
 func (*Vet) Type() string {
 	return "vet"
 }
 
-func VetActorFactory(dapr client.Client, validator *validator.Validate, broker string, topic string) actor.Factory {
+func VetActorFactory(v *validator.Validate) actor.Factory {
 	return func() actor.Server {
 		log.Info().Msg("activating actor")
-		return &Vet{dapr: dapr, validate: validator, broker: broker, topic: topic}
+		return &Vet{validate: v}
 	}
 }
 
-func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (*command.RegisterVetResponse, error) {
+// Registers a new vet. Bear in mind that the method sigmature must contain the error, even if it is currently mishandled (v1.9.5)
+func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (*command.ActorResponse, error) {
 	log.Info().Str("id", vet.ID()).Msg("begin register")
+	if err := vet.Load(); err != nil {
+		return &command.ActorResponse{Status: command.StatusError, Message: err.Error()}, nil
+	}
+	//
+	// Trying to create a vet that already has events is clearly an error, no matter how valid the command is. Kill it.
+	//
+	if len(vet.events) > 0 {
+		return &command.ActorResponse{Status: command.StatusInvalid, Message: "vet already exists"}, nil
+	}
 	//
 	// Return an error if the command does not pass validation
 	//
 	log.Debug().Str("id", vet.ID()).Msg("validate command")
 	if err := vet.validate.Struct(cmd); err != nil {
 		log.Error().Str("id", vet.ID()).Err(err).Msg("validating command")
-		return &command.RegisterVetResponse{Status: command.StatusInvalid, Message: err.Error()}, nil
-	}
-	//
-	// Return an error if the actor instance already exists
-	//
-	log.Debug().Str("id", vet.ID()).Msg("check if vet already exists")
-	found, err := vet.GetStateManager().Contains(keyDetails)
-	if err != nil {
-		log.Error().Str("id", vet.ID()).Err(err).Msg("executing statemanager::contains")
-		return &command.RegisterVetResponse{Status: command.StatusError, Message: err.Error()}, nil
-	}
-	if found {
-		log.Error().Str("id", vet.ID()).Msg("vet already exists")
-		return &command.RegisterVetResponse{Status: command.StatusInvalid, Message: fmt.Sprintf("vet '%s' already exists", vet.ID())}, nil
-	}
-	//
-	// Stores the state of the aggregate
-	//
-	log.Debug().Str("id", vet.ID()).Msg("snapshot aggregate state")
-	details := &VetDetails{Id: vet.ID(), Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email, Active: true}
-	if err := vet.GetStateManager().Set(keyDetails, details); err != nil {
-		log.Error().Str("id", vet.ID()).Err(err).Msg("snapshotting aggregate state")
-		return &command.RegisterVetResponse{Status: command.StatusError, Message: err.Error()}, nil
+		return &command.ActorResponse{Status: command.StatusInvalid, Message: err.Error()}, nil
 	}
 	//
 	// Now that we know that the state is safely stored, let´s broadcast the event
-	// NOTE: I know this is not fail-safe. This code is just for illustrative purposes. Will be improved later.
+	// NOTE: I know this is not fail-safe. This code is just for illustrative purposes. Will be improved in another edition.
 	//
-	log.Debug().Str("id", vet.ID()).Str("broker", vet.broker).Str("topic", vet.topic).Msg("publish event")
-	event := event.CloudEvent("vet", "VetRegistered", &event.VetRegistered{Id: vet.ID(), Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email})
-	if err := vet.dapr.PublishEvent(ctx, vet.broker, vet.topic, event); err != nil {
-		log.Error().Str("id", vet.ID()).Err(err).Msg("publishing event")
-		return &command.RegisterVetResponse{Status: command.StatusError, Message: err.Error()}, nil
+	log.Debug().Str("id", vet.ID()).Msg("store actor events")
+	event := event.CloudEvent("vet", EventVetRegisteredV1, &event.VetRegistered{
+		Id:      vet.ID(),
+		Name:    cmd.Name,
+		Surname: cmd.Surname,
+		Phone:   cmd.Phone,
+		Email:   cmd.Email})
+	//
+	// Apply the event to alter the state
+	//
+	if err := vet.Apply(&event); err != nil {
+		return &command.ActorResponse{Status: command.StatusError, Message: err.Error()}, nil
 	}
+	//
+	// Append the event to the queue of events to be committed
+	//
+	if err := vet.Append(&event); err != nil {
+		log.Error().Str("id", vet.ID()).Err(err).Msg("storing actor events")
+		return &command.ActorResponse{Status: command.StatusError, Message: err.Error()}, nil
+	}
+	//
+	// Return the events as response
+	//
 	log.Info().Str("id", vet.ID()).Msg("end register")
-	return &command.RegisterVetResponse{Status: command.StatusOK, Message: "OK"}, nil
+	return &command.ActorResponse{Status: command.StatusOK, Events: []*cloudevents.Event{&event}}, nil
+}
+
+// Apply alters the state of the aggregate based on the event
+func (vet *Vet) Apply(src *cloudevents.Event) error {
+	switch src.Type() {
+	case EventVetRegisteredV1:
+		ev := event.VetRegistered{}
+		if err := src.DataAs(&ev); err != nil {
+			return err
+		}
+		vet.state.Id = ev.Id
+		vet.state.Surname = ev.Surname
+		vet.state.Name = ev.Name
+		vet.state.Phone = ev.Phone
+		vet.state.Email = ev.Email
+	default:
+		return fmt.Errorf("unknown event type '%s'", src.Type())
+	}
+	return nil
+}
+
+// Load the state of the aggregate from the events log. Returns
+func (vet *Vet) Load() error {
+	if vet.state == nil {
+		vet.state = &VetState{}
+		err := vet.GetStateManager().Get(KeyEvents, &vet.events)
+		if err != nil {
+			return err
+		}
+		for index, event := range vet.events {
+			vet.state.Version = index
+			if err := vet.Apply(event); err != nil {
+				//
+				// Erase the state if an error occurs.
+				// In this way, any further attempt at using this actor instance will fail until the event stream handling gets fixed.
+				//
+				vet.state = nil
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (vet *Vet) Append(events ...*cloudevents.Event) error {
+	vet.events = append(vet.events, events...)
+	return vet.GetStateManager().Set(KeyEvents, vet.events)
 }

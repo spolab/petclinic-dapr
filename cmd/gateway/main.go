@@ -14,3 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 package main
+
+// The gateway is responsible for turning a REST request into a command and forward it to the relevant actor.
+// The actor will respond with either a) a series of events to be broadcasted or b) an error indicating if the command was invalid or an error occurred while executing it.
+// If the actor execution is successful, the gateway will be responsible for broadcasting the event to all the parties interested.
+func main() {
+
+}

@@ -17,10 +17,12 @@ package event
 
 import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
 )
 
 func CloudEvent(source string, kind string, data any) cloudevents.Event {
 	result := cloudevents.NewEvent()
+	result.SetID(uuid.NewString())
 	result.SetSource(source)
 	result.SetType(kind)
 	result.SetData(cloudevents.ApplicationJSON, data)

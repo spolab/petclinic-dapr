@@ -16,9 +16,6 @@ limitations under the License.
 package main
 
 import (
-	"os"
-
-	"github.com/dapr/go-sdk/client"
 	"github.com/dapr/go-sdk/service/http"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
@@ -26,23 +23,11 @@ import (
 )
 
 func main() {
-	//
-	// Load the start parameters
-	//
-	broker := os.Getenv("BROKER")
-	topic := os.Getenv("TOPIC")
-	log.Info().Str("pubsub", broker).Str("topic", topic).Msg("starting vet microservice")
-	//
-	// Connect to the DAPR sidecar
-	//
-	client, err := client.NewClient()
-	if err != nil {
-		log.Fatal().Err(err).Msg("connecting to the dapr sidecar")
-	}
+	log.Info().Msg("starting vet microservice")
 	//
 	// Start the actor server
 	//
 	app := http.NewService("127.0.0.1:3000")
-	app.RegisterActorImplFactory(model.VetActorFactory(client, validator.New(), broker, topic))
+	app.RegisterActorImplFactory(model.VetActorFactory(validator.New()))
 	log.Fatal().Err(app.Start()).Msg("starting the actor server")
 }
