@@ -123,7 +123,7 @@ func (m CloudEventArrayMatcher) Matches(arg any) bool {
 		log.Error().Msg("arrays are of different size")
 		return false
 	}
-	for i, _ := range actual {
+	for i := range actual {
 		if !stringsEqual(m.expected[i].SpecVersion(), actual[i].SpecVersion(), "specversion", i) {
 			return false
 		}
