@@ -42,6 +42,7 @@ func TestVetLoadOk(t *testing.T) {
 	//
 	// Mock the state manager to return the stream
 	//
+	sm.EXPECT().Contains(KeyEvents).Return(true, nil)
 	sm.EXPECT().Get(KeyEvents, &instance.events).Return(nil)
 	//
 	// Load the aggregate from the events
@@ -79,7 +80,7 @@ func TestRegisterVetOk(t *testing.T) {
 	//
 	// Execute the request
 	//
-	sm.EXPECT().Get(KeyEvents, &instance.events).Return(nil)
+	sm.EXPECT().Contains(KeyEvents).Return(false, nil)
 	sm.EXPECT().Set(KeyEvents, MatchesEvents(&registered)).Return(nil)
 	_, err := instance.Register(context.Background(), &command.RegisterVetCommand{Name: "name", Surname: "surname", Phone: "phone", Email: "mail@mail.com"})
 	require.Nil(t, err)

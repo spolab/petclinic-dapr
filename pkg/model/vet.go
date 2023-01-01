@@ -134,20 +134,26 @@ func (vet *Vet) Apply(src *cloudevents.Event) error {
 // Load the state of the aggregate from the events log. Returns
 func (vet *Vet) Load() error {
 	if vet.state == nil {
-		vet.state = &VetState{}
-		err := vet.GetStateManager().Get(KeyEvents, &vet.events)
+		found, err := vet.GetStateManager().Contains(KeyEvents)
 		if err != nil {
 			return err
 		}
-		for index, event := range vet.events {
-			vet.state.Version = index
-			if err := vet.Apply(event); err != nil {
-				//
-				// Erase the state if an error occurs.
-				// In this way, any further attempt at using this actor instance will fail until the event stream handling gets fixed.
-				//
-				vet.state = nil
+		vet.state = &VetState{}
+		if found {
+			err := vet.GetStateManager().Get(KeyEvents, &vet.events)
+			if err != nil {
 				return err
+			}
+			for index, event := range vet.events {
+				vet.state.Version = index
+				if err := vet.Apply(event); err != nil {
+					//
+					// Erase the state if an error occurs.
+					// In this way, any further attempt at using this actor instance will fail until the event stream handling gets fixed.
+					//
+					vet.state = nil
+					return err
+				}
 			}
 		}
 	}
