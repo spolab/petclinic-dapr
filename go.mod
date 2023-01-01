@@ -7,6 +7,8 @@ require (
 	github.com/dapr/go-sdk v1.6.0
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-playground/validator/v10 v10.11.1
+	github.com/golang/mock v1.6.0
+	github.com/google/uuid v1.3.0
 	github.com/nats-io/jsm.go v0.0.35
 	github.com/nats-io/nats.go v1.22.1
 	github.com/rs/zerolog v1.28.0
@@ -18,9 +20,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.15.13 // indirect
