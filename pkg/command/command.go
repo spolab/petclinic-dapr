@@ -31,7 +31,7 @@ type RegisterVetCommand struct {
 }
 
 type ActorResponse struct {
-	Status  int    `json:"status"`
-	Message string `json:"message,omitempty"`
-	Events  []*cloudevents.Event
+	Status  int                  `json:"status"`
+	Message string               `json:"message,omitempty"`
+	Events  []*cloudevents.Event `json:"events,omitempty"`
 }
