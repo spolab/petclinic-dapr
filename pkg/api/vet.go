@@ -93,7 +93,7 @@ func Register(dapr client.Client, broker string, topic string) http.HandlerFunc 
 func GetActive(dapr client.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		res, err := dapr.QueryStateAlpha1(ctx, "state-petclinic", "", nil)
+		res, err := dapr.QueryStateAlpha1(ctx, "state-petclinic", "{}", nil)
 		if err != nil {
 			String(w, http.StatusInternalServerError, err.Error())
 			return
