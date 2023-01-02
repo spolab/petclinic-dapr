@@ -39,7 +39,7 @@ func Register(dapr client.Client, broker string, topic string) http.HandlerFunc 
 		// Invoke the actor method
 		//
 		log.Debug().Str("id", id).Str("payload", string(bytes)).Msg("executing actor method")
-		raw, err := dapr.InvokeActor(ctx, &client.InvokeActorRequest{ActorType: "vet", ActorID: id, Method: "register", Data: bytes})
+		raw, err := dapr.InvokeActor(ctx, &client.InvokeActorRequest{ActorType: "vet", ActorID: id, Method: "Register", Data: bytes})
 		if err != nil {
 			String(w, http.StatusInternalServerError, err.Error())
 			log.Error().Str("id", id).Err(err).Msg("invoking actor method")

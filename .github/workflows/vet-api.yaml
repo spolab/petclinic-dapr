@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # 
-name: Actor Server Pipeline
+name: Vet API Pipeline
 
 env:
   IMAGE_NAME: ghcr.io/spolab/petclinic-vet-api:latest
@@ -22,9 +22,9 @@ on:
     branches: [ "main" ]
     paths:
       - "cmd/vet/main.go"
-      - "pkg/vet/vet.go"
-      - "pkg/vet/respond.go"
-      - "pkg/vet/parse.go"
+      - "pkg/api/vet.go"
+      - "pkg/api/respond.go"
+      - "pkg/api/parse.go"
       - "pkg/command/*.go"
       - "pkg/event/*.go"
   pull_request:
@@ -48,7 +48,7 @@ jobs:
     - name: Compile actor server
       run: go build -o bin/actor $SRC
     - name: Build actor server image
-      run: docker build --file docker/Dockerfile --build-arg APP=bin/actor --build-arg DESC="dapr petstore actor server" --tag $IMAGE_NAME .
+      run: docker build --file docker/Dockerfile --build-arg APP=bin/actor --build-arg DESC="dapr petstore vet API server" --tag $IMAGE_NAME .
     - name: Login to GHCR repository
       uses: docker/login-action@v2.1.0
       with:
