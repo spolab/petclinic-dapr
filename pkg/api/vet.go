@@ -16,14 +16,29 @@ limitations under the License.
 package api
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/dapr/go-sdk/client"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/spolab/petstore/pkg/command"
+	"github.com/spolab/petstore/pkg/event"
 )
+
+const (
+	KeyStateDeleted = "deleted"
+)
+
+type VetSnapshot struct {
+	Surname string `json:"surname"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Phone   string `json:"phone"`
+	Version int    `json:"version"`
+}
 
 func Register(dapr client.Client, broker string, topic string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +58,7 @@ func Register(dapr client.Client, broker string, topic string) http.HandlerFunc 
 		if err != nil {
 			String(w, http.StatusInternalServerError, err.Error())
 			log.Error().Str("id", id).Err(err).Msg("invoking actor method")
+
 			return
 		}
 		//
@@ -72,14 +88,45 @@ func Register(dapr client.Client, broker string, topic string) http.HandlerFunc 
 	}
 }
 
+func GetAll(dapr client.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
+}
+
 // Reads the events of interest and updates the read caches as required
 func OnEvent(dapr client.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		bytes, err := io.ReadAll(r.Body)
+		wrapper, err := cloudevents.NewEventFromHTTPRequest(r)
 		if err != nil {
 			NoContent(w, http.StatusInternalServerError)
 			return
 		}
-		log.Info().Str("payload", string(bytes)).Msg("received a VetRegistered event")
+		switch wrapper.Type() {
+		case event.EventVetRegisteredV1:
+			//
+			// Unwrap the event
+			//
+			var event event.VetRegistered
+			if err := wrapper.DataAs(&event); err != nil {
+				NoContent(w, http.StatusInternalServerError)
+				return
+			}
+			//
+			// Serialize state
+			//
+			snapshot := VetSnapshot{Surname: event.Surname, Name: event.Name, Email: event.Email, Phone: event.Phone}
+			bytes, err := json.Marshal(&snapshot)
+			if err != nil {
+				NoContent(w, http.StatusInternalServerError)
+				return
+			}
+			//
+			// Store the snapshot
+			//
+			meta := make(map[string]string)
+			meta[KeyStateDeleted] = "false"
+			dapr.SaveState(r.Context(), "state-petclinic", event.Id, bytes, meta)
+		}
 	}
 }

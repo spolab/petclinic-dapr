@@ -28,9 +28,8 @@ import (
 )
 
 const (
-	KeyState             = "state"
-	KeyEvents            = "events"
-	EventVetRegisteredV1 = "VetRegistered/v1"
+	KeyState  = "state"
+	KeyEvents = "events"
 )
 
 type VetState struct {
@@ -86,7 +85,7 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	// NOTE: I know this is not fail-safe. This code is just for illustrative purposes. Will be improved in another edition.
 	//
 	log.Debug().Str("id", vet.ID()).Msg("store actor events")
-	event := event.CloudEvent("vet", EventVetRegisteredV1, &event.VetRegistered{
+	event := event.CloudEvent("vet", event.EventVetRegisteredV1, &event.VetRegistered{
 		Id:      vet.ID(),
 		Name:    cmd.Name,
 		Surname: cmd.Surname,
@@ -115,7 +114,7 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 // Apply alters the state of the aggregate based on the event
 func (vet *Vet) Apply(src *cloudevents.Event) error {
 	switch src.Type() {
-	case EventVetRegisteredV1:
+	case event.EventVetRegisteredV1:
 		ev := event.VetRegistered{}
 		if err := src.DataAs(&ev); err != nil {
 			return err
