@@ -98,14 +98,16 @@ func GetActive(dapr client.Client) http.HandlerFunc {
 			String(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+		log.Debug().Int("items", len(res.Results)).Msg("response from query")
 		response := []*VetSnapshot{}
-		for _, item := range res.Results {
-			snapshot := &VetSnapshot{}
-			if err := json.Unmarshal(item.Value, snapshot); err != nil {
-				String(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-			response = append(response, snapshot)
+		for i, item := range res.Results {
+			// snapshot := []*VetSnapshot{}
+			// if err := json.Unmarshal(item.Value, snapshot); err != nil {
+			// 	String(w, http.StatusInternalServerError, err.Error())
+			// 	return
+			// }
+			// response = append(response, snapshot)
+			log.Debug().Str("payload", string(item.Value)).Int("index", i).Msg("response")
 		}
 		JSON(w, http.StatusOK, response)
 	}
