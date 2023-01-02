@@ -33,6 +33,7 @@ const (
 )
 
 type VetSnapshot struct {
+	Id      string `json:"id"`
 	Surname string `json:"surname"`
 	Name    string `json:"name"`
 	Email   string `json:"email"`
@@ -88,9 +89,24 @@ func Register(dapr client.Client, broker string, topic string) http.HandlerFunc 
 	}
 }
 
-func GetAll(dapr client.Client) http.HandlerFunc {
+// GetAll returns all the active vets
+func GetActive(dapr client.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
+		ctx := r.Context()
+		res, err := dapr.QueryStateAlpha1(ctx, "state-petclinic", "", nil)
+		if err != nil {
+			NoContent(w, http.StatusInternalServerError)
+		}
+		response := []*VetSnapshot{}
+		for _, item := range res.Results {
+			snapshot := &VetSnapshot{}
+			if err := json.Unmarshal(item.Value, snapshot); err != nil {
+				String(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			response = append(response, snapshot)
+		}
+		JSON(w, http.StatusOK, response)
 	}
 }
 
