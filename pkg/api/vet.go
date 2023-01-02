@@ -95,7 +95,8 @@ func GetActive(dapr client.Client) http.HandlerFunc {
 		ctx := r.Context()
 		res, err := dapr.QueryStateAlpha1(ctx, "state-petclinic", "", nil)
 		if err != nil {
-			NoContent(w, http.StatusInternalServerError)
+			String(w, http.StatusInternalServerError, err.Error())
+			return
 		}
 		response := []*VetSnapshot{}
 		for _, item := range res.Results {

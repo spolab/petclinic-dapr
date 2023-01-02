@@ -100,7 +100,6 @@ func TestRegisterVetOk(t *testing.T) {
 	// Verify that the events queue and the return type contain the right event
 	//
 	assert.Equal(t, 1, len(instance.events))
-
 }
 
 func MatchesEvents(events ...*cloudevents.Event) gomock.Matcher {
