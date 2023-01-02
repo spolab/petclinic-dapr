@@ -16,7 +16,7 @@ limitations under the License.
 package api
 
 import (
-	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/dapr/go-sdk/client"
@@ -25,30 +25,19 @@ import (
 	"github.com/spolab/petstore/pkg/command"
 )
 
-func Register(dapr client.Client) http.HandlerFunc {
+func Register(dapr client.Client, broker string, topic string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 		ctx := r.Context()
-		var cmd command.RegisterVetCommand
 		log.Debug().Str("id", id).Msg("begin register")
-		//
-		// Parse the request
-		//
-		log.Debug().Str("id", id).Msg("reading request payload")
-		if err := JsonFromReader(r.Body, &cmd); err != nil {
+		bytes, err := io.ReadAll(r.Body)
+		if err != nil {
 			String(w, http.StatusBadRequest, err.Error())
-			log.Error().Str("id", id).Err(err).Msg("reading request body")
 			return
 		}
 		//
 		// Invoke the actor method
 		//
-		log.Debug().Str("id", id).Msgf("marshalling command %v", cmd)
-		bytes, err := json.Marshal(&cmd)
-		if err != nil {
-			String(w, http.StatusBadRequest, err.Error())
-			return
-		}
 		log.Debug().Str("id", id).Str("payload", string(bytes)).Msg("executing actor method")
 		raw, err := dapr.InvokeActor(ctx, &client.InvokeActorRequest{ActorType: "vet", ActorID: id, Method: "register", Data: bytes})
 		if err != nil {
@@ -67,7 +56,30 @@ func Register(dapr client.Client) http.HandlerFunc {
 			log.Error().Str("id", id).Err(err).Msg("parsing the response")
 			return
 		}
+		//
+		// If the command is OK, take the events sent and publish them
+		//
+		if res.Status == command.StatusOK {
+			for _, event := range res.Events {
+				if err := dapr.PublishEvent(ctx, broker, topic, event, client.PublishEventWithContentType("application/cloudevents+json")); err != nil {
+					String(w, http.StatusInternalServerError, err.Error())
+					return
+				}
+			}
+		}
 		JSON(w, http.StatusAccepted, &res)
 		log.Debug().Str("id", id).Msg("END register")
+	}
+}
+
+// Updates the read cache every time there is a new vet registered
+func OnEvent(dapr client.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		bytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			NoContent(w, http.StatusInternalServerError)
+			return
+		}
+		log.Info().Str("payload", string(bytes)).Msg("received a VetRegistered event")
 	}
 }

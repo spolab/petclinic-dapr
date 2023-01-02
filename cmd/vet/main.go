@@ -47,7 +47,8 @@ func main() {
 	// Initialize the router
 	//
 	router := chi.NewRouter()
-	router.Put("/{id}", api.Register(dapr))
+	router.Post("/onevent", api.OnEvent(dapr))
+	router.Put("/{id}", api.Register(dapr, pubsub, topic))
 	//
 	// Start the server
 	//

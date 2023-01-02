@@ -38,6 +38,10 @@ func String(w http.ResponseWriter, statusCode int, source string) error {
 	return respond(w, statusCode, textPlain, []byte(source))
 }
 
+func NoContent(w http.ResponseWriter, statusCode int) {
+	w.WriteHeader(statusCode)
+}
+
 func respond(w http.ResponseWriter, statusCode int, contentType string, data []byte) error {
 	w.WriteHeader(statusCode)
 	w.Header().Add(keyContentType, contentType)
