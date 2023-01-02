@@ -72,7 +72,7 @@ func Register(dapr client.Client, broker string, topic string) http.HandlerFunc 
 	}
 }
 
-// Updates the read cache every time there is a new vet registered
+// Reads the events of interest and updates the read caches as required
 func OnEvent(dapr client.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		bytes, err := io.ReadAll(r.Body)
