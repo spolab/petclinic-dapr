@@ -61,13 +61,13 @@ func Register(dapr client.Client, broker string, topic string) http.HandlerFunc 
 		//
 		if res.Status == command.StatusOK {
 			for _, event := range res.Events {
-				if err := dapr.PublishEvent(ctx, broker, topic, event, client.PublishEventWithContentType("application/cloudevents+json")); err != nil {
+				if err := dapr.PublishEvent(ctx, broker, topic, event, client.PublishEventWithRawPayload()); err != nil {
 					String(w, http.StatusInternalServerError, err.Error())
 					return
 				}
 			}
 		}
-		JSON(w, http.StatusAccepted, &res)
+		NoContent(w, http.StatusAccepted)
 		log.Debug().Str("id", id).Msg("END register")
 	}
 }
