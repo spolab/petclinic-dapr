@@ -43,8 +43,8 @@ func NoContent(w http.ResponseWriter, statusCode int) {
 }
 
 func respond(w http.ResponseWriter, statusCode int, contentType string, data []byte) error {
-	w.WriteHeader(statusCode)
 	w.Header().Add(keyContentType, contentType)
+	w.WriteHeader(statusCode)
 	if _, err := w.Write(data); err != nil {
 		return err
 	}
