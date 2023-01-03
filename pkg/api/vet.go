@@ -134,7 +134,7 @@ func OnEvent(dapr client.Client, store string) http.HandlerFunc {
 			//
 			// Serialize state
 			//
-			snapshot := VetSnapshot{Surname: event.Surname, Name: event.Name, Email: event.Email, Phone: event.Phone}
+			snapshot := VetSnapshot{Id: event.Id, Surname: event.Surname, Name: event.Name, Email: event.Email, Phone: event.Phone}
 			bytes, err := json.Marshal(&snapshot)
 			if err != nil {
 				NoContent(w, http.StatusInternalServerError)
