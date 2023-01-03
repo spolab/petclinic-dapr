@@ -90,10 +90,10 @@ func Register(dapr client.Client, broker string, topic string) http.HandlerFunc 
 }
 
 // GetAll returns all the active vets
-func GetActive(dapr client.Client) http.HandlerFunc {
+func GetActive(dapr client.Client, store string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		res, err := dapr.QueryStateAlpha1(ctx, "state-petclinic", "{}", nil)
+		res, err := dapr.QueryStateAlpha1(ctx, store, "{}", nil)
 		if err != nil {
 			String(w, http.StatusInternalServerError, err.Error())
 			return
@@ -114,7 +114,7 @@ func GetActive(dapr client.Client) http.HandlerFunc {
 }
 
 // Reads the events of interest and updates the read caches as required
-func OnEvent(dapr client.Client) http.HandlerFunc {
+func OnEvent(dapr client.Client, store string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		wrapper, err := cloudevents.NewEventFromHTTPRequest(r)
 		if err != nil {
@@ -145,7 +145,7 @@ func OnEvent(dapr client.Client) http.HandlerFunc {
 			//
 			meta := make(map[string]string)
 			meta[KeyStateDeleted] = "false"
-			dapr.SaveState(r.Context(), "state-petclinic", event.Id, bytes, meta)
+			dapr.SaveState(r.Context(), store, event.Id, bytes, meta)
 		}
 	}
 }

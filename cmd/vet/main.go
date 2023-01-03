@@ -32,6 +32,7 @@ var revision string
 func main() {
 	pubsub := os.Getenv("BROKER")
 	topic := os.Getenv("TOPIC")
+	store := os.Getenv("STORE")
 	//
 	// Announces the bootstrap of the microservice
 	//
@@ -47,9 +48,9 @@ func main() {
 	// Initialize the router
 	//
 	router := chi.NewRouter()
-	router.Post("/onevent", api.OnEvent(dapr))
+	router.Post("/onevent", api.OnEvent(dapr, store))
 	router.Put("/{id}", api.Register(dapr, pubsub, topic))
-	router.Get("/", api.GetActive(dapr))
+	router.Get("/", api.GetActive(dapr, store))
 	//
 	// Start the server
 	//
