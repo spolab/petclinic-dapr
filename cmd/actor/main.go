@@ -29,5 +29,6 @@ func main() {
 	//
 	app := http.NewService("127.0.0.1:3000")
 	app.RegisterActorImplFactory(model.VetActorFactory(validator.New()))
+	app.RegisterActorImplFactory(model.ClientActorFactory)
 	log.Fatal().Err(app.Start()).Msg("starting the actor server")
 }

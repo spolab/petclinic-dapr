@@ -30,6 +30,7 @@ func (actor *Client) Type() string {
 	return "client"
 }
 
+// register a new client
 func (actor *Client) Register(ctx context.Context, cmd *command.RegisterClientCommand) (*command.ActorResponse, error) {
 	res, err := actor.handleCommand(func() ([]*cloudevents.Event, error) {
 		// Validate command
@@ -46,6 +47,7 @@ func (actor *Client) Register(ctx context.Context, cmd *command.RegisterClientCo
 	return res, err
 }
 
+// applies the events to update the actor state
 func (actor *Client) Apply(ces ...*cloudevents.Event) error {
 	for _, ce := range ces {
 		switch ce.Type() {
@@ -67,6 +69,7 @@ func (actor *Client) Apply(ces ...*cloudevents.Event) error {
 	return nil
 }
 
+// create new instances of an client actor
 func ClientActorFactory() actor.Server {
 	return &Client{
 		validate: validator.New(),
