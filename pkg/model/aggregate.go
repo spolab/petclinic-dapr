@@ -34,7 +34,7 @@ func (base *BaseAggregateRoot[T]) State() T {
 	return base.state
 }
 
-// A basic implementation that will always return an error
+// Applies the events to the aggregate state
 func (base *BaseAggregateRoot[T]) Apply(...*cloudevents.Event) error {
 	return fmt.Errorf("not implemented")
 }

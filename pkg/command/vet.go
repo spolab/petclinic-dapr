@@ -15,31 +15,9 @@ limitations under the License.
 */
 package command
 
-import cloudevents "github.com/cloudevents/sdk-go/v2"
-
-const (
-	StatusOK = iota
-	StatusInvalid
-	StatusError
-)
-
 type RegisterVetCommand struct {
 	Name    string `json:"name" validate:"required"`
 	Surname string `json:"surname" validate:"required"`
 	Phone   string `json:"phone" validate:"required"`
 	Email   string `json:"email" validate:"required,email"`
-}
-
-type ActorResponse struct {
-	Status  int                  `json:"status"`
-	Message string               `json:"message,omitempty"`
-	Events  []*cloudevents.Event `json:"events,omitempty"`
-}
-
-type RegisterClientCommand struct {
-	Salutation string `json:"salutation" validate:"required"`
-	Name       string `json:"name" validate:"required"`
-	Surname    string `json:"surname" validate:"required"`
-	Phone      string `json:"phone" validate:"required"`
-	Email      string `json:"email" validate:"required,email"`
 }
