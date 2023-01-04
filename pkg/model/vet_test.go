@@ -27,7 +27,7 @@ func TestVetLoadOk(t *testing.T) {
 	// Creates the stream of events that the actor will load
 	//
 	registered := cloudevents.NewEvent()
-	registered.SetType(event.EventVetRegisteredV1)
+	registered.SetType(event.TypeVetRegisteredV1)
 	registered.SetData(cloudevents.ApplicationJSON, event.VetRegistered{Id: vetId, Name: "name", Surname: "surname", Phone: "phone", Email: "mail@mail.com"})
 	stream := []*cloudevents.Event{
 		&registered,
@@ -76,12 +76,12 @@ func TestRegisterVetOk(t *testing.T) {
 	//
 	// Expected array of events
 	//
-	registered := event.CloudEvent("vet", event.EventVetRegisteredV1, &event.VetRegistered{Id: vetId, Name: "name", Surname: "surname", Phone: "phone", Email: "mail@mail.com"})
+	registered := event.CloudEvent("vet", event.TypeVetRegisteredV1, &event.VetRegistered{Id: vetId, Name: "name", Surname: "surname", Phone: "phone", Email: "mail@mail.com"})
 	//
 	// Execute the request
 	//
 	sm.EXPECT().Contains(KeyEvents).Return(false, nil)
-	sm.EXPECT().Set(KeyEvents, MatchesEvents(&registered)).Return(nil)
+	sm.EXPECT().Set(KeyEvents, MatchesEvents(registered)).Return(nil)
 	_, err := instance.Register(context.Background(), &command.RegisterVetCommand{Name: "name", Surname: "surname", Phone: "phone", Email: "mail@mail.com"})
 	require.Nil(t, err)
 	//

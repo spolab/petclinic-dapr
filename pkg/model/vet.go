@@ -85,7 +85,7 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	// NOTE: I know this is not fail-safe. This code is just for illustrative purposes. Will be improved in another edition.
 	//
 	log.Debug().Str("id", vet.ID()).Msg("store actor events")
-	event := event.CloudEvent("vet", event.EventVetRegisteredV1, &event.VetRegistered{
+	event := event.CloudEvent("vet", event.TypeVetRegisteredV1, &event.VetRegistered{
 		Id:      vet.ID(),
 		Name:    cmd.Name,
 		Surname: cmd.Surname,
@@ -94,13 +94,13 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	//
 	// Apply the event to alter the state
 	//
-	if err := vet.Apply(&event); err != nil {
+	if err := vet.Apply(event); err != nil {
 		return &command.ActorResponse{Status: command.StatusError, Message: err.Error()}, nil
 	}
 	//
 	// Append the event to the queue of events to be committed
 	//
-	if err := vet.Append(&event); err != nil {
+	if err := vet.Append(event); err != nil {
 		log.Error().Str("id", vet.ID()).Err(err).Msg("storing actor events")
 		return &command.ActorResponse{Status: command.StatusError, Message: err.Error()}, nil
 	}
@@ -108,13 +108,13 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	// Return the events as response
 	//
 	log.Info().Str("id", vet.ID()).Msg("end register")
-	return &command.ActorResponse{Status: command.StatusOK, Events: []*cloudevents.Event{&event}}, nil
+	return &command.ActorResponse{Status: command.StatusOK, Events: []*cloudevents.Event{event}}, nil
 }
 
 // Apply alters the state of the aggregate based on the event
 func (vet *Vet) Apply(src *cloudevents.Event) error {
 	switch src.Type() {
-	case event.EventVetRegisteredV1:
+	case event.TypeVetRegisteredV1:
 		ev := event.VetRegistered{}
 		if err := src.DataAs(&ev); err != nil {
 			return err

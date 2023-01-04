@@ -22,12 +22,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func CloudEvent(source string, kind string, data any) cloudevents.Event {
+func CloudEvent(source string, kind string, data any) *cloudevents.Event {
 	result := cloudevents.NewEvent()
 	result.SetID(uuid.NewString())
 	result.SetSource(source)
 	result.SetType(kind)
 	result.SetData(cloudevents.ApplicationJSON, data)
 	result.SetTime(time.Now())
-	return result
+	return &result
 }

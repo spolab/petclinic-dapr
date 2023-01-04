@@ -15,7 +15,7 @@ limitations under the License.
 */
 package event
 
-const EventVetRegisteredV1 = "VetRegistered/v1"
+const TypeVetRegisteredV1 = "VetRegistered/v1"
 
 type VetRegistered struct {
 	Id      string `json:"id"`

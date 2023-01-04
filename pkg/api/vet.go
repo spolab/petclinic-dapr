@@ -122,7 +122,7 @@ func OnEvent(dapr client.Client, store string) http.HandlerFunc {
 			return
 		}
 		switch wrapper.Type() {
-		case event.EventVetRegisteredV1:
+		case event.TypeVetRegisteredV1:
 			//
 			// Unwrap the event
 			//

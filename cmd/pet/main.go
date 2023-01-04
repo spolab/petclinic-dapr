@@ -36,7 +36,7 @@ func main() {
 	//
 	// Announces the bootstrap of the microservice
 	//
-	log.Info().Str("revision", revision).Str("pubsub", pubsub).Str("topic", topic).Msg("starting vet microservice")
+	log.Info().Str("revision", revision).Str("pubsub", pubsub).Str("topic", topic).Msg("starting pet microservice")
 	//
 	// Connect to the DAPR sidecar
 	//
