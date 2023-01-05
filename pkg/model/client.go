@@ -76,6 +76,7 @@ func ClientActorFactory() actor.Server {
 	result := &ClientActor{
 		validate: validator.New(),
 	}
+	result.ClearEvents()
 	result.Lifecycle = framework.EventSourcedCommandLifecycle{
 		Repository: framework.EventSourcedActorRepository{},
 	}
