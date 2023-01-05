@@ -13,22 +13,22 @@ import (
 	"github.com/spolab/petstore/pkg/framework"
 )
 
-type Client struct {
-	framework.BaseEventSourcedAggregate
-	validate   *validator.Validate
-	Salutation string
-	Surname    string
-	Name       string
-	Phone      string
-	Email      string
+type ClientActor struct {
+	framework.BaseEventSourcedAggregate `json:"-"`
+	validate                            *validator.Validate `json:"-"`
+	Salutation                          string              `json:"salutation"`
+	Surname                             string              `json:"surname"`
+	Name                                string              `json:"name"`
+	Phone                               string              `json:"phone"`
+	Email                               string              `json:"email"`
 }
 
-func (actor *Client) Type() string {
+func (actor *ClientActor) Type() string {
 	return "client"
 }
 
 // register a new client
-func (actor *Client) Register(ctx context.Context, cmd *command.RegisterClientCommand) (*command.ActorResponse, error) {
+func (actor *ClientActor) Register(ctx context.Context, cmd *command.RegisterClientCommand) (*command.ActorResponse, error) {
 	err := actor.Lifecycle.Execute(actor, func() error {
 		// The actor already exists
 		if actor.Version == 0 {
@@ -47,7 +47,7 @@ func (actor *Client) Register(ctx context.Context, cmd *command.RegisterClientCo
 	return nil, err
 }
 
-func (actor *Client) Apply(ces ...*cloudevents.Event) error {
+func (actor *ClientActor) Apply(ces ...*cloudevents.Event) error {
 	for _, ce := range ces {
 		switch ce.Type() {
 		case event.TypeClientRegisteredV1:
@@ -66,14 +66,18 @@ func (actor *Client) Apply(ces ...*cloudevents.Event) error {
 	return nil
 }
 
-func (actor *Client) Check() error {
+// Tests the invariants of the client
+func (actor *ClientActor) Check() error {
 	return nil
 }
 
 // create new instances of an client actor
 func ClientActorFactory() actor.Server {
-	result := &Client{
+	result := &ClientActor{
 		validate: validator.New(),
+	}
+	result.Lifecycle = framework.EventSourcedCommandLifecycle{
+		Repository: framework.EventSourcedActorRepository{},
 	}
 	return result
 }

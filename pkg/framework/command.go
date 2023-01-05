@@ -11,14 +11,14 @@ type CommandExecutionLifecycle interface {
 	Execute(actor EventSourcedAggregate, handle CommandHandler) error
 }
 
-type EventSourcedCommandExecutor struct {
-	repo EventSourcedRepository
+type EventSourcedCommandLifecycle struct {
+	Repository EventSourcedRepository
 }
 
-func (e EventSourcedCommandExecutor) Execute(aggregate EventSourcedAggregate, handle CommandHandler) error {
+func (e EventSourcedCommandLifecycle) Execute(aggregate EventSourcedAggregate, handle CommandHandler) error {
 	log.Info().Str("id", aggregate.ID()).Msg("begin handleCommand")
 	log.Debug().Str("id", aggregate.ID()).Msg("load event stream")
-	err := e.repo.Load(aggregate)
+	err := e.Repository.Load(aggregate)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (e EventSourcedCommandExecutor) Execute(aggregate EventSourcedAggregate, ha
 	// Append and store the events to the stream
 	//
 	log.Debug().Str("id", aggregate.ID()).Msg("store event stream")
-	if err := e.repo.Save(aggregate); err != nil {
+	if err := e.Repository.Save(aggregate); err != nil {
 		return err
 	}
 	log.Info().Str("id", aggregate.ID()).Msg("end handleCommand")
