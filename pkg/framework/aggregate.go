@@ -3,103 +3,46 @@ package framework
 import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/dapr/go-sdk/actor"
-	"github.com/rs/zerolog/log"
-	"github.com/spolab/petstore/pkg/command"
 )
 
-const (
-	daprKeyEvents = "events"
-)
-
-// A command handler is a function capable of a command against a state of type S
-type CommandHandler func() ([]*cloudevents.Event, error)
-
-type EventSourcedState interface {
-	// EventApplicator is responsible for applying a stream of events to a state of type S
-	Apply(events ...*cloudevents.Event) error
-	// Check the aggregate invariantes
+type EventSourcedAggregate interface {
+	// Returns the ID of the aggregate
+	ID() string
+	// Mutates the state of the aggregate by applying the given events
+	Apply(...*cloudevents.Event) error
+	// Tells whether the state invariants hold, error otherwise
 	Check() error
+	// Returns the events that have not been committed since last save
+	UncommittedEvents() []*cloudevents.Event
+	// Adds events to the list of uncommitted events
+	AppendEvent(...*cloudevents.Event)
+	// Clear the queue of uncommitted events
+	ClearEvents()
+	// I really wish this was not here but it has to
+	GetStateManager() actor.StateManager
 }
 
 // An event sourced actor is capable of dealing with an event source state
-type EventSourcedActor[T EventSourcedState] struct {
+type BaseEventSourcedAggregate struct {
 	actor.ServerImplBase
-	State  T
-	Stream []*cloudevents.Event
+	State             EventSourcedState
+	Lifecycle         CommandExecutionLifecycle
+	uncommittedEvents []*cloudevents.Event
+	Version           int
 }
 
-func (actor *EventSourcedActor[T]) Load() error {
-	var events []*cloudevents.Event
-	var state T
-	found, err := actor.GetStateManager().Contains(daprKeyEvents)
-	if err != nil {
-		return err
-	}
-	if found {
-		if err := actor.GetStateManager().Get(daprKeyEvents, &events); err != nil {
-			return err
-		}
-		if err := state.Apply(events...); err != nil {
-			return err
-		}
-	}
-	actor.State = state
-	return nil
+func (a *BaseEventSourcedAggregate) SetLifecycle(lifecycle CommandExecutionLifecycle) {
+	a.Lifecycle = lifecycle
 }
 
-// Stores the Dapr actor events using the state manager.
-// The ID is ignored because the state manager already knows it (it is stateful).
-func (actor EventSourcedActor[T]) Save() error {
-	if err := actor.GetStateManager().Set(daprKeyEvents, actor.Stream); err != nil {
-		return err
-	}
-	return nil
+func (a *BaseEventSourcedAggregate) UncommittedEvents() []*cloudevents.Event {
+	return a.uncommittedEvents
 }
 
-// handleCommand is a utility method that does covers the lifecycle of a command execution.
-func (base EventSourcedActor[T]) HandleCommand(cmd any, handle CommandHandler) (*command.ActorResponse, error) {
-	log.Info().Str("id", base.ID()).Msg("begin handleCommand")
-	log.Debug().Str("id", base.ID()).Msg("load event stream")
-	err := base.Load()
-	if err != nil {
-		return nil, err
-	}
-	//
-	// Checks the invariants before executing the command
-	//
-	if err := base.State.Check(); err != nil {
-		return nil, err
-	}
-	//
-	// Execute the command
-	//
-	log.Debug().Str("id", base.ID()).Msg("execute command")
-	events, err := handle()
-	if err != nil {
-		return nil, err
-	}
-	//
-	// Update the status using the events returned by the handler
-	//
-	log.Debug().Str("id", base.ID()).Msg("apply events to state")
-	if err := base.State.Apply(events...); err != nil {
-		return nil, err
-	}
-	//
-	// Check invariants again
-	//
-	log.Debug().Str("id", base.ID()).Msg("check invariants (post-execution")
-	if err := base.State.Check(); err != nil {
-		return nil, err
-	}
-	//
-	// Append and store the events to the stream
-	//
-	log.Debug().Str("id", base.ID()).Msg("store event stream")
-	base.Stream = append(base.Stream, events...)
-	if err := base.Save(); err != nil {
-		return nil, err
-	}
-	log.Info().Str("id", base.ID()).Msg("end handleCommand")
-	return &command.ActorResponse{Status: command.StatusOK, Message: "", Events: events}, nil
+func (a *BaseEventSourcedAggregate) AppendEvent(events ...*cloudevents.Event) {
+	a.uncommittedEvents = append(a.uncommittedEvents, events...)
+}
+
+func (a *BaseEventSourcedAggregate) ClearEvents() {
+	a.uncommittedEvents = []*cloudevents.Event{}
 }

@@ -13,33 +13,14 @@ import (
 	"github.com/spolab/petstore/pkg/framework"
 )
 
-type ClientState struct {
-	Id         string
+type Client struct {
+	framework.BaseEventSourcedAggregate
+	validate   *validator.Validate
 	Salutation string
 	Surname    string
 	Name       string
 	Phone      string
 	Email      string
-	Version    int
-}
-
-func (state ClientState) Apply(ces ...*cloudevents.Event) error {
-	for _, ce := range ces {
-		switch ce.Type() {
-		case event.TypeClientRegisteredV1:
-			break
-		}
-	}
-	return nil
-}
-
-func (state ClientState) Check() error {
-	return nil
-}
-
-type Client struct {
-	framework.EventSourcedActor[ClientState]
-	validate *validator.Validate
 }
 
 func (actor *Client) Type() string {
@@ -48,44 +29,51 @@ func (actor *Client) Type() string {
 
 // register a new client
 func (actor *Client) Register(ctx context.Context, cmd *command.RegisterClientCommand) (*command.ActorResponse, error) {
-	res, err := actor.HandleCommand(cmd, func() ([]*cloudevents.Event, error) {
+	err := actor.Lifecycle.Execute(actor, func() error {
+		// The actor already exists
+		if actor.Version == 0 {
+			return fmt.Errorf("client id '%s' already exists", actor.ID())
+		}
 		// Validate command
 		if err := actor.validate.Struct(cmd); err != nil {
-			return nil, err
+			return err
 		}
-		return []*cloudevents.Event{event.CloudEvent("client", event.TypeClientRegisteredV1, &event.ClientRegistered{Id: actor.ID(), Salutation: cmd.Salutation, Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email})}, nil
+		actor.AppendEvent(event.CloudEvent("client", event.TypeClientRegisteredV1, &event.ClientRegistered{Id: actor.ID(), Salutation: cmd.Salutation, Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email}))
+		return nil
 	})
 	if err != nil {
 		log.Error().Str("id", actor.ID()).Err(err).Msg("executing command")
 	}
-	return res, err
+	return nil, err
 }
 
-// applies the events to update the actor state
-func (actor *Client) Apply(state *ClientState, ces ...*cloudevents.Event) error {
+func (actor *Client) Apply(ces ...*cloudevents.Event) error {
 	for _, ce := range ces {
 		switch ce.Type() {
 		case event.TypeClientRegisteredV1:
-			var cr event.ClientRegistered
-			if err := ce.DataAs(&cr); err != nil {
+			var ev event.ClientRegistered
+			if err := ce.DataAs(&ev); err != nil {
 				return err
 			}
-			state.Salutation = cr.Salutation
-			state.Surname = cr.Surname
-			state.Name = cr.Name
-			state.Phone = cr.Phone
-			state.Email = cr.Email
-			state.Version++
-		default:
-			return fmt.Errorf("unknown event type '%s'", ce.Type())
+			actor.Email = ev.Email
+			actor.Name = ev.Name
+			actor.Phone = ev.Phone
+			actor.Salutation = ev.Salutation
+			actor.Surname = ev.Surname
+			actor.Version = 1
 		}
 	}
 	return nil
 }
 
+func (actor *Client) Check() error {
+	return nil
+}
+
 // create new instances of an client actor
 func ClientActorFactory() actor.Server {
-	return &Client{
+	result := &Client{
 		validate: validator.New(),
 	}
+	return result
 }
