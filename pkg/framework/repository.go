@@ -24,7 +24,7 @@ func (repo EventSourcedActorRepository) Load(target EventSourcedAggregate) error
 		return err
 	}
 	if found {
-		if err := target.GetStateManager().Get(daprKeyEvents, events); err != nil {
+		if err := target.GetStateManager().Get(daprKeyEvents, &events); err != nil {
 			return err
 		}
 		if err := target.Apply(events...); err != nil {
