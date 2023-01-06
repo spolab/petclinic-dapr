@@ -33,10 +33,12 @@ type EventSourcedCommandLifecycle struct {
 func (e EventSourcedCommandLifecycle) Execute(aggregate EventSourcedAggregate, handle CommandHandler) error {
 	log.Info().Str("id", aggregate.ID()).Msg("begin handleCommand")
 	//
-	// It is worth reminding why the clear of the uncommitted events happens here
-	// Dapr´s ActorManager saves the state of the actor only at the exit of the message handler.
+	// It is worth reminding why the clear of the uncommitted events happens here:
+	// Dapr's ActorManager saves the state of the actor only at the exit of the message handler.
 	// We have no visibility, therefore, about whether those events have been truly committed or not.
 	// What really matters, instead, is that we reload the actor fresh prior to command execution.
+	// If the StateManager fails to persist the events, then an error will be returned to the caller,
+	// so there will be no visibility of the events. The API therefore won't broadcast them.
 	//
 	log.Debug().Str("id", aggregate.ID()).Msg("clearing committed events")
 	aggregate.ClearEvents()
