@@ -14,7 +14,3 @@ func TestClientActorFactory(t *testing.T) {
 	assert.NotNil(t, instance.UncommittedEvents())
 	assert.NotNil(t, instance.Lifecycle)
 }
-
-func TestRegister(t *testing.T) {
-
-}
