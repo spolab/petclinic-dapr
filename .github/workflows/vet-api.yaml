@@ -27,7 +27,6 @@ on:
       - "pkg/api/parse.go"
       - "pkg/command/*.go"
       - "pkg/event/*.go"
-      - "pkg/framework/*.go"
   pull_request:
     branches: [ "main" ]
 
