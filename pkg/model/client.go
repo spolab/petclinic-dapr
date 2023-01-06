@@ -39,17 +39,15 @@ func (actor *ClientActor) Register(ctx context.Context, cmd *command.RegisterCli
 			return err
 		}
 		// Append the events
-		actor.AppendEvent(event.CloudEvent(
-			"client",
-			event.TypeClientRegisteredV1,
-			&event.ClientRegistered{
-				Id:         actor.ID(),
-				Salutation: cmd.Salutation,
-				Name:       cmd.Name,
-				Surname:    cmd.Surname,
-				Phone:      cmd.Phone,
-				Email:      cmd.Email}),
-		)
+		cr := &event.ClientRegistered{
+			Id:         actor.ID(),
+			Salutation: cmd.Salutation,
+			Name:       cmd.Name,
+			Surname:    cmd.Surname,
+			Phone:      cmd.Phone,
+			Email:      cmd.Email,
+		}
+		actor.AppendEvent(event.CloudEvent(event.FromSource("client"), event.OfType(event.TypeClientRegisteredV1), event.WithDataAsJSON(cr)))
 		return nil
 	})
 	if err != nil {
@@ -59,7 +57,8 @@ func (actor *ClientActor) Register(ctx context.Context, cmd *command.RegisterCli
 }
 
 func (actor *ClientActor) Apply(ces ...*cloudevents.Event) error {
-	for _, ce := range ces {
+	log.Info().Str("id", actor.ID()).Msg("begin apply")
+	for index, ce := range ces {
 		switch ce.Type() {
 		case event.TypeClientRegisteredV1:
 			var ev event.ClientRegistered
@@ -71,9 +70,12 @@ func (actor *ClientActor) Apply(ces ...*cloudevents.Event) error {
 			actor.Phone = ev.Phone
 			actor.Salutation = ev.Salutation
 			actor.Surname = ev.Surname
-			actor.Version = 1
+			actor.Version = index + 1
+		default:
+			log.Warn().Str("id", actor.ID()).Str("type", ce.Type()).Msg("unknown event type")
 		}
 	}
+	log.Info().Str("id", actor.ID()).Msg("end apply")
 	return nil
 }
 
@@ -84,6 +86,7 @@ func (actor *ClientActor) Check() error {
 
 // create new instances of an client actor
 func ClientActorFactory() actor.Server {
+	log.Info().Msg("begin clientactorfactory")
 	result := &ClientActor{
 		validate: validator.New(),
 	}
@@ -91,5 +94,6 @@ func ClientActorFactory() actor.Server {
 	result.Lifecycle = framework.EventSourcedCommandLifecycle{
 		Repository: framework.EventSourcedActorRepository{},
 	}
+	log.Info().Msg("end clientactorfactory")
 	return result
 }

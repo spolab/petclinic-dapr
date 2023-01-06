@@ -22,12 +22,53 @@ import (
 	"github.com/google/uuid"
 )
 
-func CloudEvent(source string, kind string, data any) *cloudevents.Event {
+func CloudEvent(options ...EventOption) *cloudevents.Event {
 	result := cloudevents.NewEvent()
+	for _, option := range options {
+		option.Apply(&result)
+	}
 	result.SetID(uuid.NewString())
-	result.SetSource(source)
-	result.SetType(kind)
-	result.SetData(cloudevents.ApplicationJSON, data)
 	result.SetTime(time.Now())
 	return &result
+}
+
+type EventOption interface {
+	Apply(target *cloudevents.Event)
+}
+
+func WithDataAsJSON(data any) EventOption {
+	return &WithDataAsOption{contentType: cloudevents.ApplicationJSON, data: data}
+}
+
+type WithDataAsOption struct {
+	contentType string
+	data        any
+}
+
+func (o *WithDataAsOption) Apply(event *cloudevents.Event) {
+	event.SetData(o.contentType, o.data)
+}
+
+func FromSource(source string) EventOption {
+	return &FromSourceOption{source: source}
+}
+
+type FromSourceOption struct {
+	source string
+}
+
+func (o *FromSourceOption) Apply(event *cloudevents.Event) {
+	event.SetSource(o.source)
+}
+
+func OfType(kind string) EventOption {
+	return &OfTypeOption{kind: kind}
+}
+
+type OfTypeOption struct {
+	kind string
+}
+
+func (o *OfTypeOption) Apply(event *cloudevents.Event) {
+	event.SetType(o.kind)
 }

@@ -74,7 +74,8 @@ func TestRegisterVetOk(t *testing.T) {
 	//
 	// Expected array of events
 	//
-	registered := event.CloudEvent("vet", event.TypeVetRegisteredV1, &event.VetRegistered{Id: vetId, Name: "name", Surname: "surname", Phone: "phone", Email: "mail@mail.com"})
+	vr := &event.VetRegistered{Id: vetId, Name: "name", Surname: "surname", Phone: "phone", Email: "mail@mail.com"}
+	registered := event.CloudEvent(event.FromSource("vet"), event.OfType(event.TypeVetRegisteredV1), event.WithDataAsJSON(vr))
 	//
 	// Execute the request
 	//

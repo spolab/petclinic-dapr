@@ -85,12 +85,14 @@ func (vet *Vet) Register(ctx context.Context, cmd *command.RegisterVetCommand) (
 	// NOTE: I know this is not fail-safe. This code is just for illustrative purposes. Will be improved in another edition.
 	//
 	log.Debug().Str("id", vet.ID()).Msg("store actor events")
-	event := event.CloudEvent("vet", event.TypeVetRegisteredV1, &event.VetRegistered{
+	vr := &event.VetRegistered{
 		Id:      vet.ID(),
 		Name:    cmd.Name,
 		Surname: cmd.Surname,
 		Phone:   cmd.Phone,
-		Email:   cmd.Email})
+		Email:   cmd.Email,
+	}
+	event := event.CloudEvent(event.FromSource("vet"), event.OfType(event.TypeVetRegisteredV1), event.WithDataAsJSON(vr))
 	//
 	// Apply the event to alter the state
 	//

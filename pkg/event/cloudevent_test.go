@@ -10,7 +10,7 @@ import (
 
 func TestCloudEvent(t *testing.T) {
 	expData := map[string]string{"key": "value"}
-	actual := CloudEvent("source", "kind", expData)
+	actual := CloudEvent(FromSource("source"), OfType("kind"), WithDataAsJSON(expData))
 	require.NotNil(t, actual)
 	assert.Equal(t, "1.0", actual.SpecVersion())
 	_, err := uuid.Parse(actual.ID())
