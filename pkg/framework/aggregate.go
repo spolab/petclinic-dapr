@@ -25,7 +25,6 @@ type EventSourcedAggregate interface {
 // An event sourced actor is capable of dealing with an event source state
 type BaseEventSourcedAggregate struct {
 	actor.ServerImplBase
-	State             EventSourcedState
 	Lifecycle         CommandExecutionLifecycle
 	uncommittedEvents []*cloudevents.Event
 	Version           int
