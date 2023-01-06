@@ -31,7 +31,7 @@ func (actor *ClientActor) Type() string {
 func (actor *ClientActor) Register(ctx context.Context, cmd *command.RegisterClientCommand) ([]*cloudevents.Event, error) {
 	err := actor.Lifecycle.Execute(actor, func() error {
 		// The actor already exists
-		if actor.Version == 0 {
+		if actor.Version != 0 {
 			return fmt.Errorf("client id '%s' already exists", actor.ID())
 		}
 		// Validate command
@@ -39,7 +39,17 @@ func (actor *ClientActor) Register(ctx context.Context, cmd *command.RegisterCli
 			return err
 		}
 		// Append the events
-		actor.AppendEvent(event.CloudEvent("client", event.TypeClientRegisteredV1, &event.ClientRegistered{Id: actor.ID(), Salutation: cmd.Salutation, Name: cmd.Name, Surname: cmd.Surname, Phone: cmd.Phone, Email: cmd.Email}))
+		actor.AppendEvent(event.CloudEvent(
+			"client",
+			event.TypeClientRegisteredV1,
+			&event.ClientRegistered{
+				Id:         actor.ID(),
+				Salutation: cmd.Salutation,
+				Name:       cmd.Name,
+				Surname:    cmd.Surname,
+				Phone:      cmd.Phone,
+				Email:      cmd.Email}),
+		)
 		return nil
 	})
 	if err != nil {
