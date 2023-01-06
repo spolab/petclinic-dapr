@@ -53,6 +53,5 @@ func (repo EventSourcedActorRepository) Save(source EventSourcedAggregate) error
 	if err := source.GetStateManager().Set(daprKeyEvents, source.UncommittedEvents()); err != nil {
 		return err
 	}
-	source.ClearEvents()
 	return nil
 }

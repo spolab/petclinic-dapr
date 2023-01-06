@@ -32,14 +32,22 @@ type EventSourcedCommandLifecycle struct {
 
 func (e EventSourcedCommandLifecycle) Execute(aggregate EventSourcedAggregate, handle CommandHandler) error {
 	log.Info().Str("id", aggregate.ID()).Msg("begin handleCommand")
+	//
+	// It is worth reminding why the clear of the uncommitted events happens here
+	// Dapr´s ActorManager saves the state of the actor only at the exit of the message handler.
+	// We have no visibility, therefore, about whether those events have been truly committed or not.
+	// What really matters, instead, is that we reload the actor fresh prior to command execution.
+	//
+	log.Debug().Str("id", aggregate.ID()).Msg("clearing committed events")
+	aggregate.ClearEvents()
 	log.Debug().Str("id", aggregate.ID()).Msg("load event stream")
-	err := e.Repository.Load(aggregate)
-	if err != nil {
+	if err := e.Repository.Load(aggregate); err != nil {
 		return err
 	}
 	//
 	// Checks the invariants before executing the command
 	//
+	log.Debug().Str("id", aggregate.ID()).Msg("check invariants (pre-execution)")
 	if err := aggregate.Check(); err != nil {
 		return err
 	}
@@ -60,7 +68,7 @@ func (e EventSourcedCommandLifecycle) Execute(aggregate EventSourcedAggregate, h
 	//
 	// Check invariants again
 	//
-	log.Debug().Str("id", aggregate.ID()).Msg("check invariants (post-execution")
+	log.Debug().Str("id", aggregate.ID()).Msg("check invariants (post-execution)")
 	if err := aggregate.Check(); err != nil {
 		return err
 	}
