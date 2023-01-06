@@ -18,7 +18,7 @@ type EventSourcedAggregate interface {
 	AppendEvent(...*cloudevents.Event)
 	// Clears the queue of uncommitted events
 	ClearEvents()
-	// I really wish this was not here but it has to
+	// I really wish this was not here but it has to because of the way Dapr works
 	GetStateManager() actor.StateManager
 }
 
