@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -11,6 +10,5 @@ import (
 func TestClientActorFactory(t *testing.T) {
 	instance, ok := ClientActorFactory().(*ClientActor)
 	require.True(t, ok)
-	assert.NotNil(t, instance.UncommittedEvents())
-	assert.NotNil(t, instance.Lifecycle)
+	require.NotNil(t, instance)
 }

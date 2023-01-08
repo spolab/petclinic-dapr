@@ -7,7 +7,7 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/mock/gomock"
-	"github.com/spolab/petstore/gen/mock/dapr/actor"
+	"github.com/spolab/petstore/gen/dapr/mock_actor"
 	"github.com/spolab/petstore/pkg/command"
 	"github.com/spolab/petstore/pkg/event"
 	"github.com/spolab/petstore/pkg/test"
@@ -20,7 +20,7 @@ func TestVetLoadOk(t *testing.T) {
 	vetId := "1234"
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	sm := actor.NewMockStateManager(ctrl)
+	sm := mock_actor.NewMockStateManager(ctrl)
 	//
 	// Creates the stream of events that the actor will load
 	//
@@ -62,7 +62,7 @@ func TestRegisterVetOk(t *testing.T) {
 	vetId := "1234"
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	sm := actor.NewMockStateManager(ctrl)
+	sm := mock_actor.NewMockStateManager(ctrl)
 	//
 	// Creates the actor instance without any prior events
 	//
