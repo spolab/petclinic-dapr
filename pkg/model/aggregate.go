@@ -124,7 +124,7 @@ func DefaultCommandLifecycle[T any](a Aggregate[T], cmd any, handler func() erro
 	// Validate the command
 	// This can be optimized by caching the validator in the lifecycle
 	//
-	if err := validator.New().Struct(&cmd); err != nil {
+	if err := validator.New().Struct(cmd); err != nil {
 		log.Error().Str("id", a.ID()).Err(err).Msg("validating command")
 		return nil, err
 	}
