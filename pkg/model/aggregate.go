@@ -18,35 +18,138 @@ package model
 import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/dapr/go-sdk/actor"
+	"github.com/go-playground/validator/v10"
+	"github.com/rs/zerolog/log"
 )
 
 const (
+	keySnapshot          = "snapshot"
 	keyUncommittedEvents = "uncommittedEvent"
 )
 
-type AggregateActor interface {
-	// Mutates the state of the aggregate by applying the given events
-	Apply(...*cloudevents.Event) error
+type Events []*cloudevents.Event
+
+type Aggregate[T any] interface {
+	// Returns the ID of the aggregate
+	ID() string
+	// Lists the events that have not been cleared yet
+	UncommittedEvents() Events
+	// Loads the aggregate from the persistence
+	Load() error
+	// Saves the aggregate
+	Save() error
+	// Mutates the state through the given events
+	Apply(Events) error
 }
+
+type StateMutator[T any] func(*T, Events) error
+
+type CommandLifecycle[T any] func(Aggregate[T], any, func() error) (Events, error)
 
 // An event sourced actor is capable of dealing with an event source state
-type BaseAggregateActor struct {
+type AggregateActor[T any] struct {
 	actor.ServerImplBase
-	uncommittedEvents []*cloudevents.Event
+	snapshot          T
+	uncommittedEvents Events
+	exists            bool
+	mutator           StateMutator[T]
+	commandLifecycle  CommandLifecycle[T]
 }
 
-func (a BaseAggregateActor) Append(events ...*cloudevents.Event) {
+func (a *AggregateActor[T]) Load() error {
+	//
+	// Load the snapshot
+	//
+	if exists, err := a.GetStateManager().Contains(keySnapshot); err != nil {
+		return err
+	} else {
+		a.exists = exists
+	}
+	if a.exists {
+		if err := a.GetStateManager().Get(keySnapshot, &a.snapshot); err != nil {
+			return err
+		}
+	}
+	//
+	// Load the uncommitted events
+	//
+	if exists, err := a.GetStateManager().Contains(keyUncommittedEvents); err != nil {
+		return err
+	} else {
+		a.exists = exists
+	}
+	if a.exists {
+		if err := a.GetStateManager().Get(keyUncommittedEvents, &a.uncommittedEvents); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (a *AggregateActor[T]) Save() error {
+	if err := a.GetStateManager().Set(keySnapshot, a.snapshot); err != nil {
+		return err
+	}
+	if err := a.GetStateManager().Set(keyUncommittedEvents, a.uncommittedEvents); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *AggregateActor[T]) Append(events ...*cloudevents.Event) {
 	a.uncommittedEvents = append(a.uncommittedEvents, events...)
-	a.GetStateManager().Set(keyClientEvents, a.uncommittedEvents)
+}
+
+func (a *AggregateActor[T]) Apply(Events) error {
+	if err := a.mutator(&a.snapshot, a.uncommittedEvents); err != nil {
+		log.Error().Str("id", a.ID()).Err(err).Msg("mutating state")
+		return err
+	}
+	return nil
 }
 
 // Returns the queue of events that have not been stored/propagated yet
-func (a BaseAggregateActor) UncommittedEvents() ([]*cloudevents.Event, error) {
-	return a.uncommittedEvents, nil
+func (a *AggregateActor[T]) UncommittedEvents() Events {
+	return a.uncommittedEvents
 }
 
 // Clears the queue of uncommitted events
-func (a BaseAggregateActor) ClearEvents() error {
-	a.uncommittedEvents = []*cloudevents.Event{}
+func (a *AggregateActor[T]) ClearEvents() error {
+	a.uncommittedEvents = Events{}
 	return a.GetStateManager().Set(keyUncommittedEvents, a.uncommittedEvents)
+}
+
+func DefaultCommandLifecycle[T any](a Aggregate[T], cmd any, handler func() error) (Events, error) {
+	//
+	// Validate the command
+	// This can be optimized by caching the validator in the lifecycle
+	//
+	if err := validator.New().Struct(&cmd); err != nil {
+		return nil, err
+	}
+	//
+	// Retrieve the actor state - assuming caching is implemented there
+	//
+	if err := a.Load(); err != nil {
+		return nil, err
+	}
+	//
+	// Execute the command handler
+	//
+	if err := handler(); err != nil {
+		return nil, err
+	}
+	//
+	// Apply the uncommitted events
+	//
+	if err := a.Apply(a.UncommittedEvents()); err != nil {
+		return nil, err
+	}
+	//
+	// Save the aggregate
+	//
+	if err := a.Save(); err != nil {
+		return nil, err
+	}
+	return a.UncommittedEvents(), nil
 }

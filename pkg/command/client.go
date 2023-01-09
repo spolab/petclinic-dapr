@@ -18,6 +18,6 @@ type RegisterPetCommand struct {
 
 // Requests an appointment for a pet. Confirmation will include Vet and Date
 type RequestAppointmentCommand struct {
-	ChipID  string `json:"" validate:"required"`
-	Symptom string `json:"" validate:"required"`
+	ChipID    string `json:"chip_id" validate:"required"`
+	Specialty string `json:"specialty" validate:"required"`
 }

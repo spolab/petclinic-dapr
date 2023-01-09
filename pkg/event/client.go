@@ -13,7 +13,6 @@ type ClientRegistered struct {
 	Surname    string `json:"surname"`
 	Phone      string `json:"phone"`
 	Email      string `json:"email"`
-	Version    int    `json:"version"`
 }
 
 type PetRegistered struct {
