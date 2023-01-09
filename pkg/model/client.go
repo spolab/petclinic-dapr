@@ -151,7 +151,9 @@ func ClientActorFactory() actor.Server {
 	log.Info().Msg("begin clientactorfactory")
 	result := &ClientActor{}
 	result.snapshot = Client{}
+	result.uncommittedEvents = Events{}
 	result.mutator = clientMutator
+	result.commandLifecycle = DefaultCommandLifecycle[Client]
 	log.Info().Msg("end clientactorfactory")
 	return result
 }
