@@ -11,11 +11,6 @@ import (
 	"github.com/spolab/petstore/pkg/event"
 )
 
-const (
-	keyClientContact = "contact"
-	keyClientPets    = "pets"
-)
-
 // A data object containing the client contact details
 type Client struct {
 	Id           string                  `json:"id"`

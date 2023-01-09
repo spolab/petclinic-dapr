@@ -24,7 +24,7 @@ import (
 
 const (
 	keySnapshot          = "snapshot"
-	keyUncommittedEvents = "uncommittedEvent"
+	keyUncommittedEvents = "uncommittedEvents"
 )
 
 type Events []*cloudevents.Event
@@ -125,30 +125,35 @@ func DefaultCommandLifecycle[T any](a Aggregate[T], cmd any, handler func() erro
 	// This can be optimized by caching the validator in the lifecycle
 	//
 	if err := validator.New().Struct(&cmd); err != nil {
+		log.Error().Str("id", a.ID()).Err(err).Msg("validating command")
 		return nil, err
 	}
 	//
 	// Retrieve the actor state - assuming caching is implemented there
 	//
 	if err := a.Load(); err != nil {
+		log.Error().Str("id", a.ID()).Err(err).Msg("retrieving state")
 		return nil, err
 	}
 	//
 	// Execute the command handler
 	//
 	if err := handler(); err != nil {
+		log.Error().Str("id", a.ID()).Err(err).Msg("executing command")
 		return nil, err
 	}
 	//
 	// Apply the uncommitted events
 	//
 	if err := a.Apply(a.UncommittedEvents()); err != nil {
+		log.Error().Str("id", a.ID()).Err(err).Msg("applying events")
 		return nil, err
 	}
 	//
 	// Save the aggregate
 	//
 	if err := a.Save(); err != nil {
+		log.Error().Str("id", a.ID()).Err(err).Msg("saving state")
 		return nil, err
 	}
 	return a.UncommittedEvents(), nil
